@@ -4,7 +4,9 @@ from django.shortcuts import render
 # Create your views here.
 from django.views import View
 
+from apps.varifications.contents import SMS_CODE_EXPIRE_TIME, YUNTONGXUN_EXPIRE_TIME
 from libs.yuntongxun.sms import CCP
+from utils.response_code import RETCODE
 
 
 class ImageCodeView(View):
@@ -49,8 +51,8 @@ class SMSCodeView(View):
         #123450
         sms_code = '%06d'%randint(0,999999)
         # 4.保存短信验证码
-        redis_conn.setex('sms_%s'%mobile,300,sms_code)
+        redis_conn.setex('sms_%s'%mobile,SMS_CODE_EXPIRE_TIME,sms_code)
         #5.发送短信验证码
         #参数１．给那个手机发送 2.data=[模板中的数据]　模板1中短信验证码的内容
-        CCP().send_template_sms(mobile,[sms_code,5],1)
-        return http.JsonResponse({"code":0})
+        CCP().send_template_sms(mobile,[sms_code,YUNTONGXUN_EXPIRE_TIME],1)
+        return http.JsonResponse({"code":RETCODE.OK})
