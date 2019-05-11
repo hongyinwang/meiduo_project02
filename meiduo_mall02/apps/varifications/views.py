@@ -8,6 +8,10 @@ from apps.varifications.contents import SMS_CODE_EXPIRE_TIME, YUNTONGXUN_EXPIRE_
 from libs.yuntongxun.sms import CCP
 from utils.response_code import RETCODE
 
+#1.导入logging
+import logging
+#2.创建(获取)日志实例
+logger = logging.getLogger('django')
 
 class ImageCodeView(View):
 
@@ -36,15 +40,25 @@ class SMSCodeView(View):
         #2.验证数据　比对　用户提交的验证码是否和redis中的一致
         #2.1链接redis
         from django_redis import get_redis_connection
-        redis_conn = get_redis_connection('code')
-        #2.2根据uuid获取验证码中的内容,怎么保存的怎么获取
-        text_server = redis_conn.get('img_%s'%uuid)
-        #2.3redis中的图片验证码有可能过期，判断是否过期
-        if text_server is None:
-            return http.HttpResponseBadRequest("图片验证码已过期")
-        #2.4　比对
-        if text_server.decode().lower() != text_client.lower():
-            return http.HttpResponseBadRequest("图片验证码不一致")
+
+        #对外界资源进行异常捕获，提高代码的健壮性
+        #外界资源：［redis mysql 读取文件］
+        try:
+            redis_conn = get_redis_connection('code')
+            #2.2根据uuid获取验证码中的内容,怎么保存的怎么获取
+            text_server = redis_conn.get('img_%s'%uuid)
+            #2.3redis中的图片验证码有可能过期，判断是否过期
+            if text_server is None:
+                return http.HttpResponseBadRequest("图片验证码已过期")
+            #2.4　比对
+            if text_server.decode().lower() != text_client.lower():
+                return http.HttpResponseBadRequest("图片验证码不一致")
+            #删除redis中已经获取的uuit,提高用户的体验度
+            redis_conn.delete('img_%s'%uuid)
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseBadRequest("数据库链接问题")
+
         #3.生成短信验证码
         from random import randint
         #12345

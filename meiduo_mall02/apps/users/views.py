@@ -8,7 +8,7 @@ from django.views import View
 from apps.users.models import User
 
 
-#1.导入
+#1.导入logging
 import logging
 #2.创建(获取)日志实例
 logger = logging.getLogger('django')
