@@ -102,6 +102,13 @@ class UsernameCountView(View):
         #将数据转换为json字符串,返回的是json数据
         return http.JsonResponse({'count': count})
 
+#登陆页面的实现
+class LoginView(View):
 
+    def get(self,request):
+        return render(request,'login.html')
+
+    def post(self,request):
+        pass
 
 
