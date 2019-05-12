@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
 # Create your views here.
+from django_redis import get_redis_connection
+
 from apps.users.models import User
 
 
@@ -38,10 +40,11 @@ class RegisterView(View):
         password2 = data.get('password2')
         mobile = data.get('mobile')
         allow = data.get('allow')
+        sms_code_client = data.get('sms_code')
 
         # 校验参数
         # 判断参数是否齐全
-        if not all([username,password,password2,mobile,allow]):
+        if not all([username,password,password2,mobile,allow,sms_code_client]):
             return http.HttpResponseBadRequest("参数不全")
         # 判断用户名是否是5-20个字符
         if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
@@ -58,6 +61,19 @@ class RegisterView(View):
         # 判断是否勾选用户协议
         if allow != 'on':
             return http.HttpResponseBadRequest('请勾选用户协议')
+
+        #8.1验证用户提交的验证码是否和redis中保存的图形验证码是否一致
+        #8.11链接redis
+        redis_conn = get_redis_connection('code')
+        # 2.2通过手机号获取uuid中短信验证码
+        sms_code_server = redis_conn.get('sms_%s' % mobile)
+        # 2.3redis中的短信验证码有可能过期，判断是否过期
+        if not sms_code_server:
+            return http.HttpResponseBadRequest("短信验证码已过期")
+        # 2.4　比对
+        if sms_code_server.decode().lower() != sms_code_client.lower():
+            return http.HttpResponseBadRequest("短信验证码不一致")
+
 
         #保存注册数据
         try:
@@ -79,7 +95,7 @@ class UsernameCountView(View):
 
     def get(self, request, username):
         #校验
-        #用户名查询
+        #用户名查询登录
         count = User.objects.filter(username=username).count()
 
         #返回相应对象

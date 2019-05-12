@@ -30,6 +30,7 @@ class ImageCodeView(View):
         redis_conn.setex('img_%s'%uuid,120,text)
         return http.HttpResponse(image,content_type='image.jpeg')
 
+#短信验证码
 class SMSCodeView(View):
 
     def get(self,request,mobile):
@@ -37,7 +38,7 @@ class SMSCodeView(View):
         params = request.GET
         uuid = params.get('image_code_id')#图片验证码的uuid
         text_client = params.get('image_code')#用户输入的图片验证码内容
-        #2.验证数据　比对　用户提交的验证码是否和redis中的一致
+        #2.验证数据　（比对　用户提交的验证码是否和redis中的一致）
         #2.1链接redis
         from django_redis import get_redis_connection
 
@@ -59,13 +60,24 @@ class SMSCodeView(View):
             logger.error(e)
             return http.HttpResponseBadRequest("数据库链接问题")
 
+        #先获取看有没有标记位
+        send_flag = redis_conn.get('send_flag_%s'%mobile)
+        if send_flag is not None:
+            return http.HttpResponseBadRequest('操作太频繁了，sms_code请稍等片刻')
+
         #3.生成短信验证码
         from random import randint
         #12345
         #123450
         sms_code = '%06d'%randint(0,999999)
+        #记录短信验证码到控制台
+        logger.info(sms_code)
         # 4.保存短信验证码
         redis_conn.setex('sms_%s'%mobile,SMS_CODE_EXPIRE_TIME,sms_code)
+
+        # 生成一个标记为１来记录表示该用户已经注册过了
+        redis_conn.setex('send_flag_%s'%mobile,60,1)
+
         #5.发送短信验证码
         #参数１．给那个手机发送 2.data=[模板中的数据]　模板1中短信验证码的内容
         CCP().send_template_sms(mobile,[sms_code,YUNTONGXUN_EXPIRE_TIME],1)

@@ -92,6 +92,7 @@ var vm = new Vue({
             var re = /^[0-9A-Za-z]{8,20}$/;
             if (re.test(this.password)) {
                 this.error_password = false;
+
             } else {
                 this.error_password = true;
             }
@@ -99,9 +100,10 @@ var vm = new Vue({
         // 确认密码
         check_password2: function () {
             if (this.password != this.password2) {
-                this.error_check_password = true;
+                this.error_password2 = true;
+                this.error_password2_message = '密码不一致'
             } else {
-                this.error_check_password = false;
+                this.error_password2 = false;
             }
         },
         // 检查手机号
