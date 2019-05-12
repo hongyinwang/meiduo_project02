@@ -91,5 +91,10 @@ class SMSCodeView(View):
 
         #5.发送短信验证码
         #参数１．给那个手机发送 2.data=[模板中的数据]　模板1中短信验证码的内容
-        CCP().send_template_sms(mobile,[sms_code,YUNTONGXUN_EXPIRE_TIME],1)
+        # CCP().send_template_sms(mobile,[sms_code,YUNTONGXUN_EXPIRE_TIME],1)
+
+        #改为celery发送短信
+        from celery_tasks.sms.tasks import send_sms_code
+        #delay()参数同任务的参数
+        send_sms_code.delay(mobile,sms_code)
         return http.JsonResponse({"code":RETCODE.OK})
