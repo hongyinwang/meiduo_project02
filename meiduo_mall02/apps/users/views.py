@@ -109,6 +109,36 @@ class LoginView(View):
         return render(request,'login.html')
 
     def post(self,request):
-        pass
+        #后端
+        #1.接受数据
+        datas = request.POST
+        #2.分别获取数据
+        username = datas.get('username')
+        password = datas.get('password')
+        #3.校验参数
+        #3.1判断参数是否齐全
+        if not all([username,password]):
+            return http.HttpResponseBadRequest("参数不齐全")
+        # 3.2判断用户名是否是5-20个字符
+        if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
+            return http.HttpResponseBadRequest('请输入5-20个字符的用户名')
+        # 3.3判断密码是否是8-20个数字
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
+            return http.HttpResponseBadRequest('请输入8-20位的密码')
+        #4.验证参数
+        #这里我们使用系统自带的认证方法，都正确，返回user对象
+        from django.contrib.auth import authenticate
+        user = authenticate(username=username,password=password)
+        #5.保存数据
+        # user = User.objects.filter(
+        #     username=username,
+        #     password=password
+        # )
+        #判断用户是否存在
+        if user is None:
+            return render(request,'login.html',context={'login_error_password':'用户名或者密码错误'})
+        #6.保存回话状态
+        return redirect(reverse('contents:register'))
+
 
 
