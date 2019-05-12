@@ -72,11 +72,22 @@ class SMSCodeView(View):
         sms_code = '%06d'%randint(0,999999)
         #记录短信验证码到控制台
         logger.info(sms_code)
-        # 4.保存短信验证码
-        redis_conn.setex('sms_%s'%mobile,SMS_CODE_EXPIRE_TIME,sms_code)
 
-        # 生成一个标记为１来记录表示该用户已经注册过了
-        redis_conn.setex('send_flag_%s'%mobile,60,1)
+        # # 4.保存短信验证码
+        # redis_conn.setex('sms_%s'%mobile,SMS_CODE_EXPIRE_TIME,sms_code)
+        #
+        # # 生成一个标记为１来记录表示该用户已经注册过了
+        # redis_conn.setex('send_flag_%s'%mobile,60,1)
+
+        #管道技术,通过减少客户端与服务端的来回tcp包的数量，来提高性能
+        #创建实例
+        pl =redis_conn.pipeline()
+        #将redis请求加入队列
+        pl.setex('sms_%s' % mobile, SMS_CODE_EXPIRE_TIME, sms_code)
+        pl.setex('send_flag_%s' % mobile, 60, 1)
+        #执行
+        pl.execute()
+
 
         #5.发送短信验证码
         #参数１．给那个手机发送 2.data=[模板中的数据]　模板1中短信验证码的内容
