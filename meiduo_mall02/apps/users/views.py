@@ -156,4 +156,18 @@ class LoginView(View):
         #返回相应
         return response
 
+from django.contrib.auth import logout
+#登出
+class LogoutView(View):
 
+    def get(self,request):
+        # 调用系统的logout方法
+        logout(request)
+        # 根据username清除cookie信息，因为我们的首页是根据username来判断是否登陆的
+        # 返回相应，设置cookie
+        response = redirect(reverse('contents:Index'))
+        response.delete_cookie('username')
+        #返回相应
+        return response
+
+#

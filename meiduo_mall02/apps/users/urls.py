@@ -10,6 +10,9 @@ urlpatterns = [
     url(r'^usernames/(?P<username>[a-zA-Z0-9_-]{5,20})/',views.UsernameCountView.as_view(), name='usernamecount'),
 
     #LoginView
-    url(r'^loginview',views.LoginView.as_view(),name='loginview')
+    url(r'^loginview',views.LoginView.as_view(),name='loginview'),
+
+    #LogoutView
+    url(r'^logoutview',views.LogoutView.as_view(),name='logoutview')
 
 ]
