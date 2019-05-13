@@ -225,3 +225,9 @@ LOGGING = {
 #这里我们需要自己的user来代替系统的User,
 # AUTH_USER_MODEL = '应用名.模型类名'
 AUTH_USER_MODEL = 'users.User'
+
+#Django默认的认证后端
+AUTHENTICATION_BACKENDS=[
+    # 'django.contrib.auth.backends.ModelBackend'
+    'apps.users.utils.UsernameMobileModelBackend'
+]

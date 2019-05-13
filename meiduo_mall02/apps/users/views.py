@@ -115,6 +115,8 @@ class LoginView(View):
         #2.分别获取数据
         username = datas.get('username')
         password = datas.get('password')
+        remembered = datas.get('remembered')
+
         #3.校验参数
         #3.1判断参数是否齐全
         if not all([username,password]):
@@ -134,6 +136,11 @@ class LoginView(View):
         if user is None:
             return render(request,'login.html',context={'login_error_password':'用户名或者密码错误'})
         #6.保存回话状态
+        #判断用户是否选择记住登陆状态
+        if remembered != 'on':
+            request.session.set_expiry(0)
+        else:
+            request.session.set_expiry(None)
 
         return redirect(reverse('contents:Index'))
 
