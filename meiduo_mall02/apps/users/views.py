@@ -132,7 +132,7 @@ class LoginView(View):
         from django.contrib.auth import authenticate
         user = authenticate(username=username,password=password)
 
-        #5.判断用户是否存在
+        #5.判断用户是否存在(即返回的user是否成功)
         if user is None:
             return render(request,'login.html',context={'login_error_password':'用户名或者密码错误'})
         #6.保存回话状态
@@ -142,7 +142,18 @@ class LoginView(View):
         else:
             request.session.set_expiry(None)
 
-        return redirect(reverse('contents:Index'))
+        #返回相应，设置cookie
+        response = redirect(reverse('contents:Index'))
 
+        #设置ｃｏｏｋｉｅ
+        #判断是否登陆成功
+        #失败
+        if remembered != 'on':
+            response.set_cookie('username',user.username,max_age=0)
+        #成功
+        else:
+            response.set_cookie('username', user.username, max_age=14*24*3600)
+        #返回相应
+        return response
 
 
