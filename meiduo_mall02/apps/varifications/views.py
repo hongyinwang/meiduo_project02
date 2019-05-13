@@ -36,6 +36,7 @@ class SMSCodeView(View):
     def get(self,request,mobile):
         #1.后端要接收数据
         params = request.GET
+        #提取数据
         uuid = params.get('image_code_id')#图片验证码的uuid
         text_client = params.get('image_code')#用户输入的图片验证码内容
         #2.验证数据　（比对　用户提交的验证码是否和redis中的一致）

@@ -129,16 +129,13 @@ class LoginView(View):
         #这里我们使用系统自带的认证方法，都正确，返回user对象
         from django.contrib.auth import authenticate
         user = authenticate(username=username,password=password)
-        #5.保存数据
-        # user = User.objects.filter(
-        #     username=username,
-        #     password=password
-        # )
-        #判断用户是否存在
+
+        #5.判断用户是否存在
         if user is None:
             return render(request,'login.html',context={'login_error_password':'用户名或者密码错误'})
         #6.保存回话状态
-        return redirect(reverse('contents:register'))
+
+        return redirect(reverse('contents:Index'))
 
 
 
