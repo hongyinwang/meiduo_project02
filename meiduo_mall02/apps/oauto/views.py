@@ -1,11 +1,12 @@
 from QQLoginTool.QQtool import OAuthQQ
 from django import http
+from django.shortcuts import render
 from django.views import View
 
 from meiduo_mall02 import settings
 from utils.response_code import RETCODE
 
-
+#qq登录功能的实现
 class QQAuthURLView(View):
 
     def get(self,request):
@@ -28,3 +29,9 @@ class QQAuthURLView(View):
                                   'errmsg':'OK',
                                   'login_url':login_url
                                   })
+
+# 视图的展示
+class OautoQQuserView(View):
+
+    def get(self,request):
+        return render(request,'oauth_callback.html')
