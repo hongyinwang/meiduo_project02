@@ -24,7 +24,7 @@
                         <h1>绑定用户</h1>
                     </div>
                     <div class="reg_form clearfix">
-                         <form method="post" id="reg_form" @submit="on_submit" v-cloak>
+                 <form method="post" id="reg_form" @submit="on_submit" v-cloak>
                     {{ csrf_input }}
                     <ul>
                         <li>
@@ -61,7 +61,7 @@
                                 <span class="error_tip">{{ qq_login_errmsg }}</span>
                             {% endif %}
                         </li>
-
+                        {#  vue的绑定#}
                         <input type="hidden" name="access_token" value="{{ openid }}">
 
                         <li class="reg_sub">

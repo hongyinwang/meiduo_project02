@@ -149,7 +149,7 @@ class LoginView(View):
         #判断是否登陆成功
         #失败
         if remembered != 'on':
-            response.set_cookie('username',user.username,max_age=0)
+            response.set_cookie('username',user.username,max_age=None)
         #成功
         else:
             response.set_cookie('username', user.username, max_age=14*24*3600)
