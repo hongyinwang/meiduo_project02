@@ -1,12 +1,21 @@
+import re
 from QQLoginTool.QQtool import OAuthQQ
 from django import http
-from django.shortcuts import render
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 
-from .utils import generic_openid_token
+from django_redis import get_redis_connection
+
 from apps.oauto.models import OAuthQQUser
+from apps.oauto.utils import generic_openid_token, check_openid_tocken
+from apps.users.models import User
 from meiduo_mall02 import settings
 from utils.response_code import RETCODE
+import logging
+logger = logging.getLogger('django')
+
 
 #ＱＱ登陆功能的实现
 class QQAuthURLView(View):
@@ -18,6 +27,7 @@ class QQAuthURLView(View):
         #动态方式拼接
         #接受请求对象,从那个网址进入的，将来成功登入之后回调的地址就是那个
         next = request.GET.get('next')
+
         #准备qq登录页面的网址
         oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID,
                         client_secret=settings.QQ_CLIENT_SECRET,
@@ -69,9 +79,73 @@ class OautoQQuserView(View):
             login(request,user)
             # 7.设置cookie
             response = redirect(reverse('contents:Index'))
-            response.set_cookie('username',user.username,max_arg=14*24*3600)
+            response.set_cookie('username',user.username,max_age=14*24*3600)
             # 8.跳转
             return response
 
+    #openid绑定用户的实现２
+    def post(self,request):
+        #1.接受收据
+        datas = request.POST
+        mobile = datas.get('mobile')
+        password = datas.get('password')
+        sms_code_client = datas.get('sms_code')
+        access_token = datas.get('access_token')
+        #2验证数据
+        #2.1判断参数是否齐全
+        mobile = str(mobile)
+        if not all([mobile,password,sms_code_client]):
+            return http.HttpResponseBadRequest("参数不齐")
+        #2.2判断手机号是否符合规则
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
 
-
+            return http.HttpResponseBadRequest('请输入正确的手机号码')
+        #2.3判断密码是否符合规则
+        if not re.match(r'^[0-9A-Za-z]{8,20}$',password):
+            return http.HttpResponseBadRequest("请输入8-20位的密码")
+        #2.4判断短信验证码是否符合规则
+        #2.4.1链接数据库
+        redis_conn = get_redis_connection('code')
+        #2.4.2通过手机号获取短信验证码
+        sms_code_server = redis_conn.get('sms_%s'%mobile)
+        #2.4.3判断短信验证码是否存在
+        if not sms_code_server:
+            return render(request, 'oauth_callback.html', {'sms_code_errmsg': '短信验证码不存在'})
+        #2.4.4判断客户输入的短信验证码＝＝服务端短信验证码
+        if sms_code_client != sms_code_server.decode():
+            return render(request,'oauth_callback.html',{'sms_code_errmsg':'无效的短信验证码'})
+        #2.5绑定openid
+        #2.5判断判断openid是否有效
+        openid = check_openid_tocken(access_token)
+        #2.5.1判断openid是否存在
+        if openid is None:
+            return http.HttpResponseBadRequest("openid不存在")
+        try:
+            #2.6判断手机号是否存在
+            user = User.objects.get(mobile=mobile)
+        except User.DoesNotExist:
+            #3保存数据,不存在则创建一个用户
+            user = User.objects.create_user(
+                mobile = mobile,
+                password = password,
+                openid = openid
+            )
+        else:
+            #3.存在则再次判断密码
+            if not user.check_password(password):
+                return http.HttpResponseBadRequest('密码错误')
+        try:
+            OAuthQQUser.objects.create(
+                openid=openid,
+                user = user
+            )
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseBadRequest("数据库错误")
+        #状态保持
+        login(request,user)
+        #设置cookie
+        response = redirect(reverse('contents:Index'))
+        response.set_cookie('username',user.username,max_age=14*24*3600)
+        #返回响应
+        return response

@@ -73,6 +73,7 @@ class SMSCodeView(View):
         sms_code = '%06d'%randint(0,999999)
         #记录短信验证码到控制台
         logger.info(sms_code)
+        print(sms_code)
 
         # # 4.保存短信验证码
         # redis_conn.setex('sms_%s'%mobile,SMS_CODE_EXPIRE_TIME,sms_code)

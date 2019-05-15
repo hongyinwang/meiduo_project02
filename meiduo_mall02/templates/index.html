@@ -16,7 +16,8 @@
 	<div class="header_con">
 		<div class="header">
 			<div class="welcome fl">欢迎来到美多商城!</div>
-                <div v-if="username" class="login_btn fl">
+			<div class="fr">
+				<div v-if="username" class="login_btn fl">
                     欢迎您：<em>[[ username ]]</em>
                     <span>|</span>
                     <a href="{{ url('users:logoutview') }}">退出</a>

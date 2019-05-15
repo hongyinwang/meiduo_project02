@@ -170,4 +170,6 @@ class LogoutView(View):
         #返回相应
         return response
 
-#
+#openid绑定用户的实现
+
+
