@@ -5,7 +5,7 @@ from libs.yuntongxun.CCPRestSDK import REST
 # 说明：主账号，登陆云通讯网站后，可在"控制台-应用"中看到开发者主账号ACCOUNT SID
 _accountSid = '8aaf07086a961c7a016a9a3c42350307'
 
-# 说明：主账号Token，登陆云通讯网站后，可在控制台-应用中看到开发者主账号AUTH TOKEN
+# 说明：主账号Token，登陆云通讯网站后，可/home/python/Desktop/meiduo_40/meiduo_mall在控制台-应用中看到开发者主账号AUTH TOKEN
 _accountToken = '57c6c3ef3cef47e680519a734f6812f8'
 
 # 请使用管理控制台首页的APPID或自己创建应用的APPID

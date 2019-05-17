@@ -1,6 +1,10 @@
 import re
 from django import http
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
+import json
+
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -13,6 +17,9 @@ from apps.users.models import User
 #1.导入logging
 import logging
 #2.创建(获取)日志实例
+from utils.response_code import RETCODE
+from utils.views import LoginRequiredJSONMixin
+
 logger = logging.getLogger('django')
 
 from django.db import DatabaseError
@@ -26,11 +33,21 @@ class RegisterView(View):
     """用户注册"""
     #get请求方式
     def get(self, request):
+        """
+
+        :param request:
+        :return:
+        """
 
         return render(request, 'register.html')
 
     # post请求方式
     def post(self,request):
+        """
+
+        :param request:
+        :return:
+        """
         # ①接收数据 request.POST
         data = request.POST
         # ②分别获取数据 username,password
@@ -106,58 +123,94 @@ class UsernameCountView(View):
 class LoginView(View):
 
     def get(self,request):
+        """
+
+        :param request:
+        :return:
+        """
         return render(request,'login.html')
 
     def post(self,request):
-        #后端
-        #1.接受数据
+        """
+        :param request:
+        :return:
+        1.接受用户输入数据
+        2.校验数据
+        2.1参数是否齐全
+        2.2用户名是否符合规则
+        2.3密码是否符合规则
+        2.4用django自带的认证系统去认证用户输入的信息是否和数据库相对应
+            返回user对象
+        2.5判断user对象是否存在
+            不存在则返回登陆页及相关信息
+        2.6判断用户是否属于登陆状态
+            不登陆则设置过期时间为０
+            登陆则设置过期时间None(即当浏览器回话结束时过期)
+        3.保持登陆状态
+        3+获取next参数
+            #判断next参数是否存在，存在则跳转
+            #不存在跳转到首页成功
+        4.再次判断是否选择记住登陆状态(设置cockie,目的是用浏览器记住用户信息)
+            #未登陆则设置过期时间浏览器回话结束时
+            #登陆则设置过期时间一周
+        5.返回响应
+
+        """
+        #1.接受用户输入数据
         datas = request.POST
-        #2.分别获取数据
         username = datas.get('username')
         password = datas.get('password')
         remembered = datas.get('remembered')
 
-        #3.校验参数
-        #3.1判断参数是否齐全
+        #2.校验数
+        #2.1判断参数是否齐全
         if not all([username,password]):
             return http.HttpResponseBadRequest("参数不齐全")
-        # 3.2判断用户名是否是5-20个字符
+        #2.2用户名是否符合规则(5-20个字符)
         if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
             return http.HttpResponseBadRequest('请输入5-20个字符的用户名')
-        # 3.3判断密码是否是8-20个数字
+        #2.3密码是否符合规则(8-20个数字)
         if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
             return http.HttpResponseBadRequest('请输入8-20位的密码')
-        #4.验证参数
-        #这里我们使用系统自带的认证方法，都正确，返回user对象
+        #2.4用django自带的认证系统去认证用户输入的信息是否和数据库相对应
+            #返回user对象
         from django.contrib.auth import authenticate
         user = authenticate(username=username,password=password)
-
-        #5.判断用户是否存在(即返回的user是否成功)
+        #2.5判断user对象是否存在
         if user is None:
             return render(request,'login.html',context={'login_error_password':'用户名或者密码错误'})
-        #6.保存回话状态
-        #判断用户是否选择记住登陆状态
+        #2.6判断用户是否属于登陆状态
+            # 不登陆则设置过期时间为０
+            # 登陆则设置过期时间None(即当浏览器回话结束时过期)
         if remembered != 'on':
             request.session.set_expiry(0)
         else:
             request.session.set_expiry(None)
 
-        #返回相应，设置cookie
-        response = redirect(reverse('contents:Index'))
+        #3.保持登陆状态
+        login(request, user)
+        #3+获取next参数
+            #判断next参数是否存在，存在则跳转
+            #不存在跳转到首页成功
+        next = request.GET.get('next')
+        if next:
+            return redirect(next)
+        else:
+            response = redirect(reverse('contents:Index'))
 
-        #设置ｃｏｏｋｉｅ
-        #判断是否登陆成功
-        #失败
+        #4.再次判断是否选择记住登陆状态(设置cockie,目的是用浏览器记住用户信息)
+            #未登陆则设置过期时间浏览器回话结束时
+            #登陆则设置过期时间一周
         if remembered != 'on':
             response.set_cookie('username',user.username,max_age=None)
-        #成功
         else:
             response.set_cookie('username', user.username, max_age=14*24*3600)
-        #返回相应
+
+        #5.返回相应
         return response
 
 from django.contrib.auth import logout
-#登出
+#登出界面
 class LogoutView(View):
 
     def get(self,request):
@@ -170,6 +223,104 @@ class LogoutView(View):
         #返回相应
         return response
 
-#openid绑定用户的实现
+#用户中心页面
+class UserCenterInfo(LoginRequiredMixin,View):
+    def get(self,request):
+        """
+        1.提供个人信息
+        2.返回响应
+        :param request:
+        :return:
+        """
+        #1.提供个人信息
+        context = {
+            'username':request.user.username,
+            'mobile':request.user.mobile,
+            'email':request.user.email,
+            'email_active': request.user.email,
+
+        }
+        #2.返回响应
+        return render(request,'user_center_info.html',context=context)
+
+'''
+LoginRequiredMixin 会进行一个重定向
+我们这里是进行的loadsajax 请求,我们应该返回一个json数据
+'''
+#EmailView
+class EmailView(LoginRequiredJSONMixin,View):
+    """
+        # 1.接受body数据
+        # 1.1把接受的bytes===>json数据
+        # 1.2把json转化为dict
+        # 1.3获取数据
+        # 2.验证数据
+        # 2.1邮箱地址是否符合规则
+        # 3.更新数据(email数据)
+        # 4.发送激活邮件
+        # 4.1准备发送邮箱数据(主题，消息，发件人，收件人(列表)，内容)
+        # 4.2发送数据
+        # 5.返回响应
+    """
+    def put(self,request):
+        # 1接受body数据
+        body_datas = request.body
+        # 1.1把接受的bytes===>json数据
+        json_datas = body_datas.decode()
+        # 1.2把json转化为dict
+        dict_datas= json.loads(json_datas)
+        # 1.3获取数据
+        email = dict_datas.get('email')
+
+        # 2.验证数据
+        # 2.1邮箱地址是否符合规则
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseBadRequest('参数email有误')
+
+        # 3.更新数据(email数据)
+            #成功则保存
+            #不成功则更新失败
+        try:
+            request.user.email = email
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            # raise self.retry(exc=e, max_retries=3)
+            return http.JsonResponse({'code':RETCODE.DBERR,'errmsg':'更新失败'})
+
+        # 4.发送激活邮件
+        # 4.1准备发送邮箱数据(主题，消息，发件人，收件人(列表)，内容)
+        subject = '美多商城激活邮件'
+        message = ''
+        from_email = '美多商城<qi_rui_hua@163.com>'
+        recipient_list = [email]
+        html_message = "<a href='#'>有思路,不纠结</a>"
+
+        # 4.2发送数据
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            html_message=html_message
+        )
+
+        # 4.2改为celery发送数据
+        # send_email.delay(
+        #     subject=subject,
+        #     message=message,
+        #     from_email=from_email,
+        #     recipient_list=recipient_list,
+        #     html_message=html_message
+        # )
+        # 5.返回响应
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
 
 
+
+
+  # verify_url = generic_verify_email_url(request.user.id)
+        # html_message = '<p>尊敬的用户您好！</p>' \
+        #                '<p>感谢您使用美多商城。</p>' \
+        #                '<p>您的邮箱为：%s 。请点击此链接激活您的邮箱：</p>' \
+        #                '<p><a href="%s">%s<a></p>' % (email, verify_url, verify_url)

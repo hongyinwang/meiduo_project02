@@ -7,12 +7,19 @@ urlpatterns = [
     url(r'^register/$', views.RegisterView.as_view(), name='register'),
 
     # 校验用户名是否重复
-    url(r'^usernames/(?P<username>[a-zA-Z0-9_-]{5,20})/', views.UsernameCountView.as_view(), name='usernamecount'),
+    url(r'^usernames/(?P<username>[a-zA-Z0-9_-]{5,20})/$', views.UsernameCountView.as_view(), name='usernamecount'),
 
     #LoginView
-    url(r'^loginview', views.LoginView.as_view(), name='loginview'),
+    url(r'^loginview/$', views.LoginView.as_view(), name='loginview'),
 
     #LogoutView
-    url(r'^logoutview', views.LogoutView.as_view(), name='logoutview')
+    url(r'^logoutview/$', views.LogoutView.as_view(), name='logoutview'),
+
+    #UserCenterInfo
+    url(r'^info/$', views.UserCenterInfo.as_view(), name='info'),
+
+    #UserCenterInfo
+    url(r'^emails/$', views.EmailView.as_view(), name='emails'),
+
 
 ]

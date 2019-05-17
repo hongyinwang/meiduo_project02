@@ -114,7 +114,6 @@ class OautoQQuserView(View):
         #2.4.4判断客户输入的短信验证码＝＝服务端短信验证码
         if sms_code_client != sms_code_server.decode():
             return render(request,'oauth_callback.html',{'sms_code_errmsg':'无效的短信验证码'})
-        #2.5绑定openid
         #2.5判断判断openid是否有效
         openid = check_openid_tocken(access_token)
         #2.5.1判断openid是否存在
@@ -134,6 +133,8 @@ class OautoQQuserView(View):
             #3.存在则再次判断密码
             if not user.check_password(password):
                 return http.HttpResponseBadRequest('密码错误')
+
+        #将用户绑定openid
         try:
             OAuthQQUser.objects.create(
                 openid=openid,
@@ -142,10 +143,12 @@ class OautoQQuserView(View):
         except Exception as e:
             logger.error(e)
             return http.HttpResponseBadRequest("数据库错误")
+
         #状态保持
         login(request,user)
         #设置cookie
         response = redirect(reverse('contents:Index'))
+        # next = request.GET.get('state')
         response.set_cookie('username',user.username,max_age=14*24*3600)
         #返回响应
         return response

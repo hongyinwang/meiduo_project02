@@ -26,6 +26,6 @@ urlpatterns = [
     url(r'^', include('apps.contents.urls', namespace='contents')),
     # varifications
     url(r'^', include('apps.varifications.urls', namespace='varifications')),
-    # varifications
+    # oauto
     url(r'^', include('apps.oauto.urls', namespace='oauto')),
 ]
