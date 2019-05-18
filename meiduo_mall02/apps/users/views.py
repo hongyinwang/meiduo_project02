@@ -256,9 +256,10 @@ class EmailView(LoginRequiredJSONMixin,View):
         # 1.2把json转化为dict
         # 1.3获取数据
         # 2.验证数据
-        # 2.1邮箱地址是否符合规则
+        # 2.1邮箱地址是否存在,符合规则
         # 3.更新数据(email数据)
-        # 4.发送激活邮件
+        # 4+验证邮箱的后端实现(加密)
+        # 4.发送激活邮件/异步发送邮件
         # 4.1准备发送邮箱数据(主题，消息，发件人，收件人(列表)，内容)
         # 4.2发送数据
         # 5.返回响应
@@ -274,7 +275,9 @@ class EmailView(LoginRequiredJSONMixin,View):
         email = dict_datas.get('email')
 
         # 2.验证数据
-        # 2.1邮箱地址是否符合规则
+        # 2.1邮箱地址是否存在,符合规则
+        if not email:
+            return http.HttpResponseBadRequest('缺少email参数')
         if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             return http.HttpResponseBadRequest('参数email有误')
 
@@ -308,9 +311,11 @@ class EmailView(LoginRequiredJSONMixin,View):
 
         # 4.2改为celery发送数据
         # 异步发送验证邮件
-        from celery_tasks.email.tasks import send_verify_email
+        # 4+验证邮箱的后端实现(加密)
         # verify_url = '邮件验证链接'
         verify_url = generate_verify_email_url(request.user)
+        #4.异步发送邮件验证
+        from celery_tasks.email.tasks import send_verify_email
         send_verify_email.delay(email, verify_url)
         # 5.返回响应
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
@@ -352,3 +357,7 @@ class VerifyEmailView(View):
             return http.HttpResponseBadRequest('激活失败')
         # 5.返回响应
         return redirect(reverse('users:info'))
+
+
+#收货地址界面
+class
