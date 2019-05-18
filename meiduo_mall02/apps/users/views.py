@@ -360,4 +360,12 @@ class VerifyEmailView(View):
 
 
 #收货地址界面
-class
+class AddressView(View):
+
+    def post(self,request):
+        """
+
+        :param request:
+        :return:
+        """
+        return render(request,'user_center_site.html')

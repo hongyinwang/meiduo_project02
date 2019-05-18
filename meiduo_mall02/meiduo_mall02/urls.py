@@ -28,4 +28,6 @@ urlpatterns = [
     url(r'^', include('apps.varifications.urls', namespace='varifications')),
     # oauto
     url(r'^', include('apps.oauto.urls', namespace='oauto')),
+    # areas
+    url(r'^', include('apps.areas.urls', namespace='areas')),
 ]

@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.contents',
     'apps.varifications',
-    'apps.oauto'
+    'apps.oauto',
+    'apps.areas'
 ]
 
 MIDDLEWARE = [
