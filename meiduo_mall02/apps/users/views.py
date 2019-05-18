@@ -290,37 +290,28 @@ class EmailView(LoginRequiredJSONMixin,View):
 
         # 4.发送激活邮件
         # 4.1准备发送邮箱数据(主题，消息，发件人，收件人(列表)，内容)
-        subject = '美多商城激活邮件'
-        message = ''
-        from_email = '美多商城<qi_rui_hua@163.com>'
-        recipient_list = [email]
-        html_message = "<a href='#'>有思路,不纠结</a>"
-
-        # 4.2发送数据
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=from_email,
-            recipient_list=recipient_list,
-            html_message=html_message
-        )
-
-        # 4.2改为celery发送数据
-        # send_email.delay(
+        # subject = '美多商城激活邮件'
+        # message = ''
+        # from_email = '美多商城<qi_rui_hua@163.com>'
+        # recipient_list = [email]
+        # html_message = "<a href='#'>有思路,不纠结</a>"
+        #
+        # # 4.2发送数据
+        # send_mail(
         #     subject=subject,
         #     message=message,
         #     from_email=from_email,
         #     recipient_list=recipient_list,
         #     html_message=html_message
         # )
+
+        # 4.2改为celery发送数据
+        # 异步发送验证邮件
+        from celery_tasks.email.tasks import send_verify_email
+        verify_url = '邮件验证链接'
+        send_verify_email.delay(email, verify_url)
         # 5.返回响应
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
 
 
 
-
-  # verify_url = generic_verify_email_url(request.user.id)
-        # html_message = '<p>尊敬的用户您好！</p>' \
-        #                '<p>感谢您使用美多商城。</p>' \
-        #                '<p>您的邮箱为：%s 。请点击此链接激活您的邮箱：</p>' \
-        #                '<p><a href="%s">%s<a></p>' % (email, verify_url, verify_url)
