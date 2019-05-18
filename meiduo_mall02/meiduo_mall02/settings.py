@@ -258,4 +258,4 @@ EMAIL_HOST_PASSWORD = '123456abc'
 #收件人看到的发件人
 EMAIL_FROM = '美多商城<qi_rui_hua@163.com>'
 #邮箱验证路由
-EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/va'
+EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification'

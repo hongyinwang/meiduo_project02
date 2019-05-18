@@ -17,7 +17,7 @@ from apps.users.models import User
 #1.导入logging
 import logging
 #2.创建(获取)日志实例
-from apps.users.utils import generate_verify_email_url
+from apps.users.utils import generate_verify_email_url, check_verify_email_token
 from utils.response_code import RETCODE
 from utils.views import LoginRequiredJSONMixin
 
@@ -316,4 +316,39 @@ class EmailView(LoginRequiredJSONMixin,View):
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
 
 
-
+#验证邮箱后端逻辑实现
+class VerifyEmailView(View):
+    """验证邮箱"""
+    def get(self,request):
+        """
+        #1.接受参数(tocken)
+        #2.校验参数
+        #2.1判断参数(tocken)是否存在/过期
+        #3通过check_verify_email_token方法获取对象
+        #3.1判断获取对象是否为空
+        #4.激活用户并保存(异常处理)
+        #5.返回响应
+        :param request:用户点击邮箱激活的链接地址发送的请求
+        :return:返回的激活邮箱的验证结果
+                返回用户中心页面
+        """
+        # 1.接受参数(tocken)
+        token = request.GET.get('token')
+        # 2.校验参数
+        # 2.1判断参数(tocken)是否存在/过期
+        if token is None:
+            return http.HttpResponseBadRequest("缺少参数")
+        # 3通过check_verify_email_token方法获取对象
+        user = check_verify_email_token(token)
+        # 3.1判断获取对象是否为空
+        if not user:
+            return http.HttpResponseBadRequest('用户不存在')
+        # 4.激活用户并保存(异常处理)
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseBadRequest('激活失败')
+        # 5.返回响应
+        return redirect(reverse('users:info'))

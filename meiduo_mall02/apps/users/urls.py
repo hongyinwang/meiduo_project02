@@ -21,5 +21,7 @@ urlpatterns = [
     #UserCenterInfo
     url(r'^emails/$', views.EmailView.as_view(), name='emails'),
 
+    #VerifyEmailView
+    url(r'^emails/verification/$', views.VerifyEmailView.as_view(), name='emails'),
 
 ]

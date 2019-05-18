@@ -5,6 +5,9 @@ from django.contrib.auth.backends import ModelBackend
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from apps.users.models import User
 
+import logging
+logger = logging.getLogger('django')
+
 #代码抽取
 #定义一个函数
 #哪里缺少补哪里，返回函数，验证没问题之后，删除源代码
@@ -49,7 +52,6 @@ class UsernameMobileModelBackend(ModelBackend):
 
 
 #生成邮箱验证链接
-
 def generate_verify_email_url(user):
     """
     # 1.创建实例对象
@@ -69,5 +71,43 @@ def generate_verify_email_url(user):
     verify_url = settings.EMAIL_VERIFY_URL + '?token=' +token
     # 4.返回路由
     return verify_url
+
+
+#验证链接提取用户信息
+def check_verify_email_token(token):
+    """
+    # 1.创建实例对象
+    # 2.解密数据(异常处理)
+    #     成功则解密
+    #     解密失败则返回空
+    # 3.获取数据(异常处理)
+    #     不存在则返回空
+    #     存在则返回对象user
+    # 4.验证数据(use_id,user_email)
+    :param token:
+    :return:
+    """
+    # 1.创建实例对象
+    serialize = Serializer(settings.SECRET_KEY,expires_in=3600)
+    # 2.解密数据(异常处理)
+    #     成功则解密
+    #     解密失败则返回空
+    try:
+        loads_token = serialize.loads(token)
+    except Exception as e:
+        logger.error(e)
+    else:
+        # 3.获取数据(异常处理,怎么存的,怎么获取)
+        #     不存在则返回空
+        #     存在则返回对象user
+        user_id = loads_token.get('user_id')
+        user_email = loads_token.get('email')
+        # 4.验证数据(use_id,user_email)
+        try:
+            user = User.objects.get(id=user_id,email=user_email)
+        except User.DoesNotExist:
+            return None
+        else:
+            return user
 
 
