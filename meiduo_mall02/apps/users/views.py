@@ -17,6 +17,7 @@ from apps.users.models import User
 #1.导入logging
 import logging
 #2.创建(获取)日志实例
+from apps.users.utils import generate_verify_email_url
 from utils.response_code import RETCODE
 from utils.views import LoginRequiredJSONMixin
 
@@ -308,7 +309,8 @@ class EmailView(LoginRequiredJSONMixin,View):
         # 4.2改为celery发送数据
         # 异步发送验证邮件
         from celery_tasks.email.tasks import send_verify_email
-        verify_url = '邮件验证链接'
+        # verify_url = '邮件验证链接'
+        verify_url = generate_verify_email_url(request.user)
         send_verify_email.delay(email, verify_url)
         # 5.返回响应
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
