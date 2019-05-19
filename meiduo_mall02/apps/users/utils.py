@@ -12,8 +12,6 @@ logger = logging.getLogger('django')
 #定义一个函数
 #哪里缺少补哪里，返回函数，验证没问题之后，删除源代码
 
-
-
 def get_user_by_username(username):
     try:
         # 区分手机号和用户名
@@ -50,7 +48,6 @@ class UsernameMobileModelBackend(ModelBackend):
         if user is not None and user.check_password(password):
                 return user
 
-
 #生成邮箱验证链接
 def generate_verify_email_url(user):
     """
@@ -71,7 +68,6 @@ def generate_verify_email_url(user):
     verify_url = settings.EMAIL_VERIFY_URL + '?token=' +token
     # 4.返回路由
     return verify_url
-
 
 #验证链接提取用户信息
 def check_verify_email_token(token):

@@ -10,52 +10,53 @@ logger = logging.getLogger('django')
 
 class AreasView(View):
     """省市区数据"""
-
-    def get(self, request):
-        """提供省市区数据"""
+    def get(self,request):
+        """
+        # 1.根据id获取省份数据
+        # 1+判断省份id是否真实存在
+        # 2.查询省份数据
+        # 3.序列化省份数据(对获取到省份数据进行遍历,然后添加到列表中)
+        # 4.响应省份数据
+        :param request: 省市区数据
+        :return: 省市区数据
+        """
+        # 1.根据id获取省份数据
         area_id = request.GET.get('area_id')
-
+        # 1+判断省份id是否真实存在
         if not area_id:
-            # 提供省份数据
             try:
-                # 查询省份数据
+                # 2.查询省份数据
                 province_model_list = Area.objects.filter(parent__isnull=True)
-
-                # 序列化省级数据
-                province_list = []
+                # 3.序列化省份数据(把QuerySet转化成列表字典形式)
+                provice_list = []
                 for province_model in province_model_list:
-                    province_list.append({'id': province_model.id, 'name': province_model.name})
+                    provice_list.append({'id':province_model.id,'name':province_model.name})
             except Exception as e:
                 logger.error(e)
-                return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '省份数据错误'})
-
-            # 响应省份数据
-            return JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'province_list': province_list})
+                return JsonResponse({'code':RETCODE.DBERR,'errmsg':'省份数据错误'})
+                # 4.响应省份数据
+            return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','provinces':provice_list})
         else:
-            # 提供市或区数据
             try:
-                parent_model = Area.objects.get(id=area_id)  # 查询市或区的父级
+                # 1.根据id获取市级数据
+                parent_model = Area.objects.get(id=area_id)
+                # 2.查询市或区数据
                 sub_model_list = parent_model.subs.all()
-
-                # 序列化市或区数据
+                # 3.序列化省份数据(对获取到省份数据进行遍历,然后添加到列表中,转化成对象列表的形式)
                 sub_list = []
                 for sub_model in sub_model_list:
-                    sub_list.append({'id': sub_model.id, 'name': sub_model.name})
-
-                sub_data = {
-                    'id': parent_model.id,  # 父级pk
-                    'name': parent_model.name,  # 父级name
-                    'subs': sub_list  # 父级的子集
+                    sub_list.append({"id":sub_model.id,'name':sub_model.name})
+                # 4.定义父级数据(和子级建立关联性)
+                sub_data ={
+                    'id':parent_model.id,
+                    'name':parent_model.name,
+                    'subs':sub_list
                 }
             except Exception as e:
                 logger.error(e)
-                return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '城市或区数据错误'})
-
-            # 响应市或区数据
-            return JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'sub_data': sub_data})
-
+                return JsonResponse({'code':RETCODE.DBERR,'errmsg':'城市或区数据错误'})
+                # 4.响应省份数据
+            return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','sub_data':sub_data})
 
 
 
-# mysql> select * from tb_areas where parent_id is NULL;
-# mysql> select * from tb_areas where parent_id=130000;

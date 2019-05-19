@@ -320,7 +320,6 @@ class EmailView(LoginRequiredJSONMixin,View):
         # 5.返回响应
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
 
-
 #验证邮箱后端逻辑实现
 class VerifyEmailView(View):
     """验证邮箱"""
@@ -358,11 +357,10 @@ class VerifyEmailView(View):
         # 5.返回响应
         return redirect(reverse('users:info'))
 
-
 #收货地址界面
 class AddressView(View):
 
-    def post(self,request):
+    def get(self,request):
         """
 
         :param request:

@@ -20,3 +20,22 @@ class Area(models.Model):
         return self.name
 
 
+
+"""
+    # 查询省的信息
+    select * from tb_areas where parent_id is NULL;
+
+    # ORM
+    Area.objects.filter(parent=None)
+
+
+    # 查询市的信息
+    #查询区县信息
+    select * from tb_areas where parent_id=130000;
+    select * from tb_areas where parent_id=130600;
+
+    # ORM
+    Area.objects.filter(parent_id=130000)
+    Area.objects.filter(parent_id=130600)
+
+"""

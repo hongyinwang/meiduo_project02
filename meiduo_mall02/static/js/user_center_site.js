@@ -49,6 +49,7 @@ var vm = new Vue({
                 })
                     .then(response => {
                         if (response.data.code == '0') {
+                            console.log(response)
                             this.cities = response.data.sub_data.subs;
                         } else {
                             console.log(response.data);
@@ -86,22 +87,22 @@ var vm = new Vue({
     methods: {
         // 获取省份数据
         get_provinces(){
-            var url = this.host + '/areas/';
-            axios.get(url, {
-                responseType: 'json'
-            })
-                .then(response => {
-                    if (response.data.code == '0') {
-                        this.provinces = response.data.province_list;
-                    } else {
-                        console.log(response.data);
-                        this.provinces = [];
-                    }
-                })
-                .catch(error => {
-                    console.log(error.response);
+        let url = '/areas/';
+        axios.get(url, {
+            responseType: 'json'
+        })
+            .then(response => {
+                if (response.data.code == '0') {
+                    this.provinces = response.data.provinces;
+                } else {
+                    console.log(response.data);
                     this.provinces = [];
-                });
+                }
+            })
+            .catch(error => {
+                console.log(error.response);
+                this.provinces = [];
+            })
         },
         check_receiver(){
             if (!this.form_address.receiver) {
