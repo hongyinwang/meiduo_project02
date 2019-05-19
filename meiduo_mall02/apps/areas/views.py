@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -14,29 +15,43 @@ class AreasView(View):
         """
         # 1.根据id获取省份数据
         # 1+判断省份id是否真实存在
+        # 1++读取省份缓存数据
         # 2.查询省份数据
-        # 3.序列化省份数据(对获取到省份数据进行遍历,然后添加到列表中)
+        # 3.序列化省份数据(把QuerySet转化成python列表形式)
+        # 3++存储省份缓存数据
         # 4.响应省份数据
         :param request: 省市区数据
         :return: 省市区数据
         """
         # 1.根据id获取省份数据
         area_id = request.GET.get('area_id')
+
         # 1+判断省份id是否真实存在
         if not area_id:
-            try:
-                # 2.查询省份数据
-                province_model_list = Area.objects.filter(parent__isnull=True)
-                # 3.序列化省份数据(把QuerySet转化成列表字典形式)
-                provice_list = []
-                for province_model in province_model_list:
-                    provice_list.append({'id':province_model.id,'name':province_model.name})
-            except Exception as e:
-                logger.error(e)
-                return JsonResponse({'code':RETCODE.DBERR,'errmsg':'省份数据错误'})
-                # 4.响应省份数据
+            # 1++读取省份缓存数据
+            provice_list = cache.get('province_list')
+
+            if not provice_list:
+                try:
+                    # 2.再次查询省份数据
+                    province_model_list = Area.objects.filter(parent__isnull=True)
+                    # 3.序列化省份数据(把QuerySet转化成python列表形式)
+                    provice_list = []
+                    for province_model in province_model_list:
+                        provice_list.append({'id':province_model.id,'name':province_model.name})
+                except Exception as e:
+                    logger.error(e)
+                    return JsonResponse({'code':RETCODE.DBERR,'errmsg':'省份数据错误'})
+
+                    # 3++存储省份缓存数据
+                cache.set('province_list',provice_list,3600)
+
+                    # 4.响应省份数据
             return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','provinces':provice_list})
         else:
+            #1+读取市或者区的缓存
+            sub_data = cache.get('sub_area_' + area_id)
+
             try:
                 # 1.根据id获取市级数据
                 parent_model = Area.objects.get(id=area_id)
@@ -55,8 +70,12 @@ class AreasView(View):
             except Exception as e:
                 logger.error(e)
                 return JsonResponse({'code':RETCODE.DBERR,'errmsg':'城市或区数据错误'})
+
+            #存储市或区的缓存
+            cache.set('sub_area_' + area_id,sub_data,3600)
+
                 # 4.响应省份数据
-            return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','sub_data':sub_data})
+        return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','sub_data':sub_data})
 
 
 
