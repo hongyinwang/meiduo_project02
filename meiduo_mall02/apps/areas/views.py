@@ -51,28 +51,28 @@ class AreasView(View):
         else:
             #1+读取市或者区的缓存
             sub_data = cache.get('sub_area_' + area_id)
+            if not sub_data:
+                try:
+                    # 1.根据id获取市级数据
+                    parent_model = Area.objects.get(id=area_id)
+                    # 2.查询市或区数据
+                    sub_model_list = parent_model.subs.all()
+                    # 3.序列化省份数据(对获取到省份数据进行遍历,然后添加到列表中,转化成对象列表的形式)
+                    sub_list = []
+                    for sub_model in sub_model_list:
+                        sub_list.append({"id":sub_model.id,'name':sub_model.name})
+                    # 4.定义父级数据(和子级建立关联性)
+                    sub_data ={
+                        'id':parent_model.id,
+                        'name':parent_model.name,
+                        'subs':sub_list
+                    }
+                except Exception as e:
+                    logger.error(e)
+                    return JsonResponse({'code':RETCODE.DBERR,'errmsg':'城市或区数据错误'})
 
-            try:
-                # 1.根据id获取市级数据
-                parent_model = Area.objects.get(id=area_id)
-                # 2.查询市或区数据
-                sub_model_list = parent_model.subs.all()
-                # 3.序列化省份数据(对获取到省份数据进行遍历,然后添加到列表中,转化成对象列表的形式)
-                sub_list = []
-                for sub_model in sub_model_list:
-                    sub_list.append({"id":sub_model.id,'name':sub_model.name})
-                # 4.定义父级数据(和子级建立关联性)
-                sub_data ={
-                    'id':parent_model.id,
-                    'name':parent_model.name,
-                    'subs':sub_list
-                }
-            except Exception as e:
-                logger.error(e)
-                return JsonResponse({'code':RETCODE.DBERR,'errmsg':'城市或区数据错误'})
-
-            #存储市或区的缓存
-            cache.set('sub_area_' + area_id,sub_data,3600)
+                #存储市或区的缓存
+                cache.set('sub_area_' + area_id,sub_data,3600)
 
                 # 4.响应省份数据
         return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','sub_data':sub_data})
