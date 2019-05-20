@@ -489,7 +489,7 @@ class CreateAddressView(LoginRequiredJSONMixin,View):
         # 6.返回相应
         return JsonResponse({'code': RETCODE.OK, 'errmsg': '新增地址成功', 'address':address_dict})
 
-#修改地址的后端逻辑
+#更新(修改和删除)地址的后端逻辑
 class UpdateDestroyAddressView(LoginRequiredJSONMixin, View):
     """修改和删除地址"""
 
@@ -583,3 +583,29 @@ class UpdateDestroyAddressView(LoginRequiredJSONMixin, View):
 
         # 响应删除地址结果
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
+
+#设置默认地址的后端逻辑
+class DefaultAddressView(LoginRequiredJSONMixin, View):
+    """设置默认地址"""
+
+    def put(self, request, address_id):
+        """
+        1.查询(根据地址id)要设置的地址
+        2.设置地址为默认地址
+        :param request:点击设置默认来设置默认地址
+        :param address_id:
+        :return:'errmsg': '设置默认地址成功'
+        """
+        try:
+            # 1.查询(根据地址id)要设置的地址
+            address = Address.objects.get(id=address_id)
+
+            # 2.设置地址为默认地址
+            request.user.default_address = address
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置默认地址失败'})
+
+        # 响应设置默认地址结果
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})
