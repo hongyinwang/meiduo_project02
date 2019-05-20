@@ -1,14 +1,20 @@
+import re
+
+from django import http
 from django.core.cache import cache
+import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 from apps.areas.models import Area
+
 from utils.response_code import RETCODE
 from utils.views import LoginRequiredMixin
 import logging
 
 logger = logging.getLogger('django')
 
+#省市区数据
 class AreasView(View):
     """省市区数据"""
     def get(self,request):
@@ -76,6 +82,5 @@ class AreasView(View):
 
                 # 4.响应省份数据
         return JsonResponse({'code':RETCODE.OK,'errmsg':'OK','sub_data':sub_data})
-
 
 

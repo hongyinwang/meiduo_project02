@@ -9,11 +9,11 @@
     <script type="text/javascript" src="../static/js/common.js"></script>
 	<script type="text/javascript" src="../static/js/vue-2.5.16.js"></script>
     <script type="text/javascript" src="../static/js/axios-0.18.0.min.js"></script>
-    <script TYPE="text/javascript">
-        let username = "{{ username }}";
-        let mobile = "{{ mobile }}";
-        let email = "{{ email }}";
-        let email_active = "{{ email_active }}"
+    <script type="text/javascript">
+         let username = "{{ username }}";
+         let mobile = "{{ mobile }}";
+         let email = "{{ email }}";
+         let email_active = "{{ email_active }}";
     </script>
 </head>
 <body>
@@ -39,7 +39,7 @@
 					<a href="../static/user_center_order.html">我的订单</a>
 				</div>
 			</div>
-		</div>		
+		</div>
 	</div>
 
 	<div class="search_bar clearfix">
@@ -55,7 +55,7 @@
 				<li><a href="#">美妆个护</a></li>
 				<li><a href="#">买2免1</a></li>
 			</ul>
-		</div>		
+		</div>
 	</div>
 
 	<div class="main_con clearfix">
@@ -64,7 +64,7 @@
 			<ul>
 				<li><a href="user_center_info.html" class="active">· 个人信息</a></li>
 				<li><a href="../static/user_center_order.html">· 全部订单</a></li>
-				<li><a href="user_center_site.html">· 收货地址</a></li>
+				<li><a href="{{ url("users:address") }}">· 收货地址</a></li>
 				<li><a href="../static/user_center_pass.html">· 修改密码</a></li>
 			</ul>
 		</div>
@@ -94,7 +94,7 @@
         </li>
     </ul>
 </div>
-				
+
 				<h3 class="common_title2">最近浏览</h3>
 				<div class="has_view_list">
 					<ul class="goods_type_list clearfix">
@@ -119,7 +119,7 @@
 				</li>
 
 				<li>
-					<a href="../static/detaijs/use.jsl.html"><img src="../static/images/goods/goods005.jpg"></a>
+					<a href="../static/detail.html"><img src="../static/images/goods/goods005.jpg"></a>
 					<h4><a href="#">360手机 N6 Pro 全网通</a></h4>
 					<div class="operate">
 						<span class="price">￥2699.00</span>
@@ -160,7 +160,7 @@
 			<span>|</span>
 			<a href="#">招聘人才</a>
 			<span>|</span>
-			<a href="#">友情链接</a>		
+			<a href="#">友情链接</a>
 		</div>
 		<p>CopyRight © 2016 北京美多商业股份有限公司 All Rights Reserved</p>
 		<p>电话：010-****888    京ICP备*******8号</p>

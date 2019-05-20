@@ -24,7 +24,10 @@ urlpatterns = [
     #VerifyEmailView
     url(r'^emails/verification/$', views.VerifyEmailView.as_view(), name='emails'),
 
-    # VerifyEmailView
-    url(r'^addresses/$',views.AddressView.as_view(), name='address'),
+    # AddressView
+    url(r'^address/$',views.AddressView.as_view(), name='address'),
+
+    # CreateAddressView
+    url(r'^addresses/create/$',views.CreateAddressView.as_view(), name='createaddress'),
 
 ]

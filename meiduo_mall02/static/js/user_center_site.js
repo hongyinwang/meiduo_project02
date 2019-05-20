@@ -199,7 +199,7 @@ var vm = new Vue({
                 // 注意：0 == '';返回true; 0 === '';返回false;
                 if (this.editing_address_index === '') {
                     // 新增地址
-                    var url = this.host + '/addresses/create/';
+                    var url = this.host +'/addresses/create/';
                     axios.post(url, this.form_address, {
                         headers: {
                             'X-CSRFToken': getCookie('csrftoken')
