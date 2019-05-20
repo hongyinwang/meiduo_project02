@@ -38,4 +38,7 @@ urlpatterns = [
 
     # UpdateTitleAddressView
     url(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view(), name='updatetitle'),
+
+    # ChangePasswordView
+    url(r'^changepwd/$', views.ChangePasswordView.as_view(), name='changepwd'),
 ]
