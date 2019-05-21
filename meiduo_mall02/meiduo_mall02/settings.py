@@ -261,3 +261,8 @@ EMAIL_HOST_PASSWORD = '123456abc'
 EMAIL_FROM = '美多商城<qi_rui_hua@163.com>'
 #邮箱验证路由
 EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification'
+
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'utils.fastdfs.storage.MyStorage'
+
+FDFS_URL = 'http://192.168.88.130:8888/'
