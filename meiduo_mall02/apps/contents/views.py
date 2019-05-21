@@ -31,7 +31,7 @@ class IndexView(View):
         contents = {}
         #2.2获取所有的内容分类
         content_categories = ContentCategory.objects.all()
-        #2.3遍历
+        #2.3遍历(查询出所有频道,根据)
         for cat in content_categories:
             contents[cat.key] = cat.content_set.filter(status=True).order_by('sequence')
 
