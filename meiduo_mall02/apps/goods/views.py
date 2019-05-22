@@ -10,8 +10,15 @@ from django.views import View
 from apps.contents.utils import get_categories
 from apps.goods.models import GoodsCategory, SKU
 from apps.goods.utils import get_brandcrumb
+from utils.response_code import RETCODE
 
+"""
+列表页面:
+    有分类数据,面包屑(一级分类-->二级分类-->三级分类),列表数据,热销数据
 
+    列表数据/热销数据其实是可以通过 ajax局部刷新的,但是由于我们讲的是前后端不分离
+    所以我们把列表数据 放在我们查询之后,传递给模板,通过模板来渲染
+"""
 class ListView(View):
     def get(self,request,category_id,page_num):
         """
@@ -48,7 +55,7 @@ class ListView(View):
         #3.2分类
         #3.3排序
         #先获取查询字符串的数据
-        sort = request.GET.get('sort','default')
+        sort = request.GET.get('sort','hot')
         #然后根据查询字符串确定排序的字段
         if sort == 'price':
             sort_field = 'price'
@@ -86,3 +93,42 @@ class ListView(View):
 
         }
         return render(request,'list.html',context=context)
+
+    """
+    热销数据的获取
+
+    需求:
+        当用户点击了某一个分类之后,需要让前端将分类id传递给热销视图
+
+    后端:
+
+        1.根据分类查询数据,进行排序,排序之后获取2条数据
+        2.热销数据在某一段时间内 很少变化 可以做缓存
+
+        路由和请求方式
+
+        GET     hot/category_id/
+    """
+#热销数据的获取
+class HotView(View):
+    def get(self,request,category_id):
+        """
+        1.根据分类查询数据,进行排序,排序之后获取2条数据
+        2.热销数据在某一段时间内 很少变化 可以做缓存
+        :param request:
+        :param category_id:
+        :return:
+        """
+        # 1.根据分类查询数据, 进行排序, 排序之后获取2条数据
+        skus = SKU.objects.filter(category_id=category_id).order_by('-sales')[:2]
+
+        #2.热销数据在某一段时间内 很少变化 可以做缓存
+        hot_skus = []
+        for sku in skus:
+            hot_skus.append({
+                'id':sku.id,
+                'price':sku.price,
+                'default_image_url':sku.default_image.url,
+                'name':sku.name
+            })
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','hot_skus':hot_skus})

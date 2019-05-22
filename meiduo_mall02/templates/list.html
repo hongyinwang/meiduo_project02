@@ -3,6 +3,9 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<title>美多商城-商品列表</title>
+    <script type="text/javascript">
+    let category_id = "{{ category.id }}";
+    </script>
 	<link rel="stylesheet" type="text/css" href="{{ static('css/jquery.pagination.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ static('css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ static('css/main.css') }}">
@@ -271,21 +274,18 @@
 
 	<div class="main_wrap clearfix">
 		<div class="l_wrap fl clearfix">
-			<div class="new_goods">
-				<h3>热销排行</h3>
-				<ul>
-					<li>
-						<a href="../static/detail.html"><img src="{{ static("images/goods/goods001.jpg") }}"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">￥3.90</div>
-					</li>
-					<li>
-						<a href="../static/detail.html"><img src="{{ static("images/goods/goods002.jpg") }}"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">￥16.80</div>
-					</li>
-				</ul>
-			</div>
+
+			<div class="new_goods" v-cloak>
+                <h3>热销排行</h3>
+                <ul>
+                    <li v-for="sku in hots">
+                        <a :href="sku.url"><img :src="sku.default_image_url"></a>
+                        <h4><a :href="sku.url">[[ sku.name ]]</a></h4>
+                        <div class="price">￥[[ sku.price ]]</div>
+                    </li>
+                </ul>
+            </div>
+
 		</div>
 
 		<div class="r_wrap fr clearfix">
