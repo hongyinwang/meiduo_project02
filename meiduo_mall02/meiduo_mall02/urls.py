@@ -30,4 +30,8 @@ urlpatterns = [
     url(r'^', include('apps.oauto.urls', namespace='oauto')),
     # areas
     url(r'^', include('apps.areas.urls', namespace='areas')),
+    # goods
+    url(r'^', include('apps.goods.urls', namespace='goods')),
+    # goods(子路由为haystack(自应用的中的urls))
+    url(r'^search/', include('haystack.urls')),
 ]

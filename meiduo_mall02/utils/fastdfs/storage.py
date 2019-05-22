@@ -16,6 +16,8 @@ from django.core.files.storage import Storage
 # 只要您的字段具有可自行序列化的参数，就
 # 可以使用 django.utils.deconstruct.deconstructible类装饰器（
 # 这就是Django在FileSystemStorage上使用的）。
+
+#重新url方法
 @deconstructible
 class MyStorage(Storage):
     # 2.Django必须能够在没有任何参数的情况下实例化您的存储系统。

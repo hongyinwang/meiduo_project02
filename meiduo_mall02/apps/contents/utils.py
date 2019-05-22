@@ -20,12 +20,13 @@ def get_categories():
     categories = OrderedDict()
     # 2.查询出所有的频道，根据分组和顺序进行排序
     # 　先根据组id(group_id)进行排序,然后根据顺序(sequence)进行排序,channels(频道)
+    #   <QuerySet [<GoodsChannel: 手机>, <GoodsChannel: 相机>, <GoodsChannel: 数码>,
     channels = GoodsChannel.objects.order_by('group_id', 'sequence')
     # 3.对所有的频道进行遍历
     for channel in channels:
         # 4.获取当前组
         group_id = channel.group_id  # 当前组
-        # 5.判断当前频道(组id)是否在频道字典中,不过不在则则初始化当前频道
+        # 5.判断当前频道(组id)是否在频道字典中,不在则则初始化当前频道
         if group_id not in categories:
             categories[group_id] = {'channels': [], 'sub_cats': []}
         # 6.获取当前频道的分类
