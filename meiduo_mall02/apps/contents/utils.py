@@ -45,3 +45,5 @@ def get_categories():
                 cat2.sub_cats.append(cat3)
             categories[group_id]['sub_cats'].append(cat2)
     return categories
+
+
