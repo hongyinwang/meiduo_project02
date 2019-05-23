@@ -41,4 +41,7 @@ urlpatterns = [
 
     # ChangePasswordView
     url(r'^changepwd/$', views.ChangePasswordView.as_view(), name='changepwd'),
+
+    # UserBrowseHistory
+    url(r'^browse_histories/$', views.UserBrowseHistory.as_view(), name='browse_histories'),
 ]

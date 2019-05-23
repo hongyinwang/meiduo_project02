@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.views import View
 # Create your views here.
 from django_redis import get_redis_connection
+
+from apps.goods.models import SKU
 from apps.users.models import Address
 from apps.users.models import User
 
@@ -691,3 +693,62 @@ class ChangePasswordView(LoginRequiredMixin, View):
         response.delete_cookie('username')
 
         return response
+
+    """
+    添加用户浏览记录的
+    需求
+
+        当登陆用户访问某一个商品详情页面的时候,需要让前端发送一个ajax请求,将用户信息和sku_id
+        发送给后端
+     后端:
+
+        1.接收数据
+        2.判断验证数据
+        3.数据入库(redis)
+        4.返回相应
+
+        请求方式和路由
+        POST    browse_histories/
+    """
+#保存和查询浏览记录
+class UserBrowseHistory(LoginRequiredMixin,View):
+    def post(self,request):
+        """
+        # 1.接受数据(user_id,date,sku_id)
+        # 2.通过sku_id获取对象中所有数据,在判断数据是否存在
+        # 3.保存浏览数据
+        # 3.1.链接数据库
+        # 3.2创建管道实例
+        # 3.3去重 [lrem(key,重复次数,value)]
+        # 3.4存储
+        # 3.5最后截取[ltrim(key,截取区间)]
+        # 4.返回响应
+        :param request: 访问详情页面
+        :return: sku_id　用户信息
+        """
+        # 1.接受数据(user_id,sku_id)
+        user_id = request.user.id
+        date = json.loads(request.body.decode())
+        sku_id = date.get('sku_id')#这里的sku_id是前端传过来的
+
+        # 2.通过sku_id获取对象中所有数据,在判断数据是否存在
+        try:
+            SKU.objects.get(pk=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseBadRequest('sku不存在')
+
+        # 3.保存浏览数据
+        # 3.1.链接数据库
+        redis_conn = get_redis_connection('history')
+        # 3.2创建管道实例
+        pl = redis_conn.pipeline()
+        # 3.3去重 [lrem(key,重复次数,value)]
+        pl.lrem('history_%s'%user_id,0,sku_id)
+        # 3.4存储
+        pl.lpush('history_%s'%user_id,sku_id)
+        # 3.5最后截取[ltrim(key,截取区间)]
+        pl.ltrim('history_%s'%user_id,0,4)
+        # 3.6执行
+        pl.execute()
+        # 4.返回响应
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok'})
