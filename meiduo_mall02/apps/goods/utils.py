@@ -18,7 +18,7 @@
     # }
 
 #数据尽量不要写死
-def get_brandcrumb(cat):
+def get_breadcrumb(cat):
     """
 
     :param cat:

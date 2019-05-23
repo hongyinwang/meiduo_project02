@@ -9,7 +9,7 @@ from django.views import View
 
 from apps.contents.utils import get_categories
 from apps.goods.models import GoodsCategory, SKU
-from apps.goods.utils import get_brandcrumb
+from apps.goods.utils import get_breadcrumb
 from utils.response_code import RETCODE
 
 """
@@ -48,7 +48,7 @@ class ListView(View):
             return http.HttpResponseBadRequest('分类错误')
 
         #因为面包屑数据多次用到，所以抽取一下
-        breadcrumb= get_brandcrumb(category)
+        breadcrumb= get_breadcrumb(category)
 
         #3.列表数据的获取
         #3.1获取列表中的所有数据
@@ -132,3 +132,69 @@ class HotView(View):
                 'name':sku.name
             })
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','hot_skus':hot_skus})
+
+#详情页面的获取
+class DetailView(View):
+    def get(self,request,sku_id):
+        """
+        #1.获取sku的信息
+        #2.查询商品频道的分类
+        #3.查询面包屑导航
+        #4.构建当前商品的规格键
+        #5.渲染页面
+        :param request:
+        :param sku_id:
+        :return:
+        """
+        # 1.获取sku的信息
+        try:
+            sku = SKU.objects.get(id = sku_id)
+        except SKU.DoesNotExist:
+            return render(request,'404.html')
+        # 2.查询商品频道的分类
+        categories = get_categories()
+        # 3.查询面包屑导航
+        breadcrumb= get_breadcrumb(sku.category)
+
+        # 4.构建当前商品的规格键
+        sku_specs = sku.specs.order_by('spec_id')
+        sku_key = []
+        for spec in sku_specs:
+            sku_key.append(spec.option.id)
+        # 获取当前商品的所有SKU
+        skus = sku.spu.sku_set.all()
+        # 构建不同规格参数（选项）的sku字典
+        spec_sku_map = {}
+        for s in skus:
+            # 获取sku的规格参数
+            s_specs = s.specs.order_by('spec_id')
+            # 用于形成规格参数-sku字典的键
+            key = []
+            for spec in s_specs:
+                key.append(spec.option.id)
+            # 向规格参数-sku字典添加记录
+            spec_sku_map[tuple(key)] = s.id
+        # 获取当前商品的规格信息
+        goods_specs = sku.spu.specs.order_by('id')
+        # 若当前sku的规格信息不完整，则不再继续
+        if len(sku_key) < len(goods_specs):
+            return
+        for index, spec in enumerate(goods_specs):
+            # 复制当前sku的规格键
+            key = sku_key[:]
+            # 该规格的选项
+            spec_options = spec.options.all()
+            for option in spec_options:
+                # 在规格参数sku字典中查找符合当前规格的sku
+                key[index] = option.id
+                option.sku_id = spec_sku_map.get(tuple(key))
+            spec.spec_options = spec_options
+
+        # 4.渲染页面
+        context = {
+            "categories":categories,
+            "breadcrumb":breadcrumb,
+            'sku':sku,
+            'specs':goods_specs,
+        }
+        return render(request,'detail.html',context=context)
