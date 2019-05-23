@@ -712,6 +712,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
     """
 #保存和查询浏览记录
 class UserBrowseHistory(LoginRequiredMixin,View):
+
     def post(self,request):
         """
         # 1.接受数据(user_id,date,sku_id)
@@ -752,3 +753,40 @@ class UserBrowseHistory(LoginRequiredMixin,View):
         pl.execute()
         # 4.返回响应
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok'})
+
+    def get(self,request):
+        """
+        # 1.获取用户对象(信息)
+        # 1.1.链接redis,获取前五个用户浏览的sku_id
+        # 1.2 遍历用户id来获取用户的详细信息
+        # 1.2.1 定义一个商品表
+        # 1.2.2 对sku_id进行遍历
+        # 1.2.3 根据sku_id查询出产品的所有信息
+        # 1.2.4 将对象转化为字典
+        # 2.返回数据
+
+        :param request:
+        :return:
+        """
+
+        # 1.获取用户对象(信息)
+        user = request.user
+        # 1.1.链接redis,获取用户浏览的前五个sku_id
+        redis_conn = get_redis_connection('history')
+        sku_ids = redis_conn.lrange('history_%s' % user.id, 0, 4)
+        # 1.2 遍历用户id来获取用户的详细信息
+        # 1.2.1 定义一个商品表
+        skus = []
+        # 1.2.2 对sku_id进行遍历
+        for sku_id in sku_ids:
+            # 1.2.3 根据sku_id查询出产品的所有信息
+            sku = SKU.objects.get(id=sku_id)
+            # 1.2.4 将对象转化为字典
+            skus.append({
+                'id':sku.id,
+                'name':sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price
+            })
+        # 2.返回数据
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','skus':skus})

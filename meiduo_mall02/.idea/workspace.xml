@@ -6,9 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="aea1bf85-abce-40ba-905c-fa62bf7717d4" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/users/urls.py" afterPath="$PROJECT_DIR$/apps/users/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/users/views.py" afterPath="$PROJECT_DIR$/apps/users/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/meiduo_mall02/settings.py" afterPath="$PROJECT_DIR$/meiduo_mall02/settings.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/user_center_info.html" afterPath="$PROJECT_DIR$/templates/user_center_info.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -58,8 +57,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/apps/users/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="627">
-              <caret line="753" column="34" lean-forward="true" selection-start-line="753" selection-start-column="34" selection-end-line="753" selection-end-column="34" />
+            <state relative-caret-position="159">
+              <caret line="772" column="0" lean-forward="false" selection-start-line="772" selection-start-column="0" selection-end-line="772" selection-end-column="0" />
               <folding>
                 <element signature="e#865#3268#0" expanded="false" />
                 <element signature="e#925#982#1" expanded="false" />
@@ -83,8 +82,39 @@
                 <element signature="e#17793#18475#0" expanded="false" />
                 <element signature="e#18552#19305#0" expanded="false" />
                 <element signature="e#19524#19695#1" expanded="false" />
-                <marker date="1558614160911" expanded="false" signature="19362:20892" ph="..." />
+                <element signature="e#22435#22714#1" expanded="false" />
+                <marker date="1558616769418" expanded="false" signature="19362:20892" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="base.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.virtualenvs/meiduo_mall02/lib/python3.5/site-packages/django/views/generic/base.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="168">
+              <caret line="87" column="0" lean-forward="false" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="user_center_info.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/user_center_info.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="231">
+              <caret line="101" column="49" lean-forward="false" selection-start-line="101" selection-start-column="49" selection-end-line="101" selection-end-column="49" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="user_center_info.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/static/js/user_center_info.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="336">
+              <caret line="77" column="52" lean-forward="false" selection-start-line="77" selection-start-column="36" selection-end-line="77" selection-end-column="52" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -92,8 +122,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="96">
-              <caret line="25" column="48" lean-forward="true" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="52" />
+            <state relative-caret-position="600">
+              <caret line="25" column="48" lean-forward="false" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="52" />
               <folding />
             </state>
           </provider>
@@ -102,8 +132,8 @@
       <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/users/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
-              <caret line="12" column="17" lean-forward="false" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="20" />
+            <state relative-caret-position="537">
+              <caret line="45" column="22" lean-forward="true" selection-start-line="45" selection-start-column="22" selection-end-line="45" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -112,7 +142,7 @@
       <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/meiduo_mall02/settings.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
+            <state relative-caret-position="1272">
               <caret line="53" column="4" lean-forward="false" selection-start-line="53" selection-start-column="6" selection-end-line="53" selection-end-column="50" />
               <folding />
             </state>
@@ -122,7 +152,7 @@
       <file leaf-file-name="detail.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/detail.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-216">
+            <state relative-caret-position="792">
               <caret line="33" column="47" lean-forward="false" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
               <folding />
             </state>
@@ -132,7 +162,7 @@
       <file leaf-file-name="detail.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/static/js/detail.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
+            <state relative-caret-position="2784">
               <caret line="116" column="25" lean-forward="false" selection-start-line="116" selection-start-column="25" selection-end-line="116" selection-end-column="25" />
               <folding />
             </state>
@@ -151,7 +181,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>info</find>
       <find>is_shojuw</find>
       <find>pop</find>
       <find>data</find>
@@ -181,6 +210,7 @@
       <find>4122</find>
       <find>new</find>
       <find>goods_detail</find>
+      <find>has_view</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -212,7 +242,6 @@
         <option value="$PROJECT_DIR$/static/js/user_center_site.js" />
         <option value="$PROJECT_DIR$/templates/user_center_site.html" />
         <option value="$PROJECT_DIR$/templates/user_center_pass.html" />
-        <option value="$PROJECT_DIR$/templates/user_center_info.html" />
         <option value="$PROJECT_DIR$/apps/contents/models.py" />
         <option value="$PROJECT_DIR$/utils/fastdfs/client.conf" />
         <option value="$PROJECT_DIR$/utils/models.py" />
@@ -239,6 +268,7 @@
         <option value="$PROJECT_DIR$/apps/goods/views.py" />
         <option value="$PROJECT_DIR$/apps/users/urls.py" />
         <option value="$PROJECT_DIR$/meiduo_mall02/settings.py" />
+        <option value="$PROJECT_DIR$/templates/user_center_info.html" />
         <option value="$PROJECT_DIR$/apps/users/views.py" />
       </list>
     </option>
@@ -256,10 +286,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="937" />
-    <option name="y" value="83" />
-    <option name="width" value="969" />
-    <option name="height" value="771" />
+    <option name="x" value="850" />
+    <option name="y" value="58" />
+    <option name="width" value="963" />
+    <option name="height" value="790" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -293,6 +323,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -379,17 +411,47 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="meiduo_mall02" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="meiduo_mall02" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="apps" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="meiduo_mall02" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="meiduo_mall02" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="apps" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="users" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="settings.editor.splitter.proportion" value="0.36308068" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../meiduo_40/meiduo_mall" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="js.eslint.eslintPackage" value="" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="JavaScriptPreferStrict" value="false" />
@@ -855,7 +917,14 @@
       <option name="project" value="LOCAL" />
       <updated>1558599300284</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="添加用户浏览记录">
+      <created>1558614340123</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1558614340123</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TodoView">
@@ -868,10 +937,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="937" y="83" width="969" height="771" extended-state="0" />
+    <frame x="850" y="58" width="963" height="790" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16828479" sideWeight="0.8364419" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2938733" sideWeight="0.8364419" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3262987" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20259741" sideWeight="0.5162177" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37218046" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -881,7 +950,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.6695987" sideWeight="0.49348232" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24928775" sideWeight="0.4747596" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15520446" sideWeight="0.16355811" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32840237" sideWeight="0.4837823" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2924791" sideWeight="0.4837823" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -910,7 +979,8 @@
     <MESSAGE value="录入商品数据和图片数据" />
     <MESSAGE value="首页商品数据获取" />
     <MESSAGE value="统计分类商品访问量" />
-    <option name="LAST_COMMIT_MESSAGE" value="统计分类商品访问量" />
+    <MESSAGE value="添加用户浏览记录" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加用户浏览记录" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -919,6 +989,11 @@
           <url>file://$PROJECT_DIR$/apps/varifications/views.py</url>
           <line>57</line>
           <option name="timeStamp" value="139" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/apps/users/views.py</url>
+          <line>772</line>
+          <option name="timeStamp" value="223" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -931,25 +1006,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="222" />
+      <option name="time" value="224" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/script/import_goods_data.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="1" column="50" lean-forward="true" selection-start-line="1" selection-start-column="50" selection-end-line="1" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/script/goods_data.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5784">
-          <caret line="11" column="40" lean-forward="true" selection-start-line="11" selection-start-column="40" selection-end-line="11" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/8860da38-5900-4571-b37d-29a8bd3764b0/console.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1003,7 +1064,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
           <caret line="21" column="13" lean-forward="false" selection-start-line="21" selection-start-column="13" selection-end-line="21" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1115,7 +1175,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="9" column="11" lean-forward="false" selection-start-line="1" selection-start-column="9" selection-end-line="9" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1199,10 +1258,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
           <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#35#0" expanded="false" />
-            <element signature="e#108#1446#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1249,7 +1304,7 @@
         <state relative-caret-position="9">
           <caret line="249" column="0" lean-forward="true" selection-start-line="249" selection-start-column="0" selection-end-line="249" selection-end-column="0" />
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#0#23#0" expanded="false" />
             <element signature="e#290#432#1" expanded="false" />
             <element signature="e#459#2401#0" expanded="false" />
             <element signature="e#511#818#1" expanded="false" />
@@ -1272,31 +1327,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="25" column="48" lean-forward="true" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="52" />
+        <state relative-caret-position="600">
+          <caret line="25" column="48" lean-forward="false" selection-start-line="25" selection-start-column="48" selection-end-line="25" selection-end-column="52" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/static/js/detail.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
+        <state relative-caret-position="2784">
           <caret line="116" column="25" lean-forward="false" selection-start-line="116" selection-start-column="25" selection-end-line="116" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/users/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="12" column="17" lean-forward="false" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="20" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/detail.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-216">
+        <state relative-caret-position="792">
           <caret line="33" column="47" lean-forward="false" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
           <folding />
         </state>
@@ -1304,8 +1351,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/meiduo_mall02/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
+        <state relative-caret-position="1272">
           <caret line="53" column="4" lean-forward="false" selection-start-line="53" selection-start-column="6" selection-end-line="53" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user_center_info.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="101" column="49" lean-forward="false" selection-start-line="101" selection-start-column="49" selection-end-line="101" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/static/js/user_center_info.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="77" column="52" lean-forward="false" selection-start-line="77" selection-start-column="36" selection-end-line="77" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/users/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="537">
+          <caret line="45" column="22" lean-forward="true" selection-start-line="45" selection-start-column="22" selection-end-line="45" selection-end-column="22" />
           <folding />
         </state>
       </provider>
@@ -1320,8 +1391,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/users/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="627">
-          <caret line="753" column="34" lean-forward="true" selection-start-line="753" selection-start-column="34" selection-end-line="753" selection-end-column="34" />
+        <state relative-caret-position="159">
+          <caret line="772" column="0" lean-forward="false" selection-start-line="772" selection-start-column="0" selection-end-line="772" selection-end-column="0" />
           <folding>
             <element signature="e#865#3268#0" expanded="false" />
             <element signature="e#925#982#1" expanded="false" />
@@ -1345,7 +1416,8 @@
             <element signature="e#17793#18475#0" expanded="false" />
             <element signature="e#18552#19305#0" expanded="false" />
             <element signature="e#19524#19695#1" expanded="false" />
-            <marker date="1558614160911" expanded="false" signature="19362:20892" ph="..." />
+            <element signature="e#22435#22714#1" expanded="false" />
+            <marker date="1558616769418" expanded="false" signature="19362:20892" ph="..." />
           </folding>
         </state>
       </provider>
