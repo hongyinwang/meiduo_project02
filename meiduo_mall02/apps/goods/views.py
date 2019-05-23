@@ -1,16 +1,12 @@
 from django import http
-
 from django.shortcuts import render
-
-# Create your views here.
-
-#商品列表页
 from django.views import View
-
 from apps.contents.utils import get_categories
-from apps.goods.models import GoodsCategory, SKU
+from apps.goods.models import GoodsCategory, SKU, GoodsVisitCount
 from apps.goods.utils import get_breadcrumb
 from utils.response_code import RETCODE
+
+
 
 """
 列表页面:
@@ -94,21 +90,32 @@ class ListView(View):
         }
         return render(request,'list.html',context=context)
 
-    """
-    热销数据的获取
+"""
+热销数据的获取
 
-    需求:
-        当用户点击了某一个分类之后,需要让前端将分类id传递给热销视图
+需求:
+    当用户点击了某一个分类之后,需要让前端将分类id传递给热销视图
 
-    后端:
+后端:
 
-        1.根据分类查询数据,进行排序,排序之后获取2条数据
-        2.热销数据在某一段时间内 很少变化 可以做缓存
+    1.根据分类查询数据,进行排序,排序之后获取2条数据
+    2.热销数据在某一段时间内 很少变化 可以做缓存
 
-        路由和请求方式
+    路由和请求方式
 
-        GET     hot/category_id/
-    """
+    GET     hot/category_id/
+"""
+"""
+从今天开始记一些相应状态码:
+    200 成功
+
+    300 重定向
+
+    404 找不到页面(路由问题)
+    403 Forbidden 禁止访问(权限问题/没有登陆)
+
+    500 服务器问题(代码加断电)
+"""
 #热销数据的获取
 class HotView(View):
     def get(self,request,category_id):
@@ -198,3 +205,66 @@ class DetailView(View):
             'specs':goods_specs,
         }
         return render(request,'detail.html',context=context)
+
+    """
+    需求:
+        当用户点击详情(列表页面)页面的时候,我们需要让前端将分类id传递给后端
+        后端对当前的分类数据进行+1的统计
+
+    后端:
+
+        1.接收分类id
+        2.查询对应的分类信息
+        3.统计数据的更新
+        4.返回数据
+
+        请求方式和路由:
+            post  detail/visit/(?P<category_id>\d+)/
+
+
+    """
+#统计分页商品访问量
+class DetailVisitView(View):
+
+    def post(self,request,category_id):
+        """
+        #1.通过商品分类id来查询该商品
+        #2.获取当天的时间
+        #3.查询当天类别分类的记录
+        #如果当天有访问记录＝＝＝＞则更新数据＋１
+        #如果当天没有访问记录，就新建一个记录
+        #4.更新数据
+        #5.返回数据
+        :param request: 商品id 时间　
+        :param category_id:
+        :return:
+        """
+        try:
+            #1.通过商品分类id来查询该商品
+            category = GoodsCategory.objects.get(pk=category_id)
+        except GoodsCategory.DoesNotExist:
+            return http.JsonResponse({'code':RETCODE,'errmsg':'记录商品失败'})
+        # 2.获取当天的时间
+        from django.utils import timezone
+        today_time = timezone.localdate()
+
+        #3.查询当天类别分类的记录
+        try:
+            #如果当天有访问记录＝＝＝＞则更新数据＋１
+            counts_data = GoodsVisitCount.objects.get(category=category,date=today_time)
+        except GoodsVisitCount.DoesNotExist:
+            #如果当天没有访问记录，就新建一个记录
+            counts_data = GoodsVisitCount(
+                category=category,
+                count=1,
+                date=today_time
+            )
+            counts_data.save()
+        #4.更新数据
+        else:
+            #查询出来了
+            #3.3 更新数据
+            counts_data.count +=1
+            counts_data.save()
+        #5.返回数据
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK'})
