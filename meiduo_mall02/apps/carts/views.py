@@ -137,6 +137,7 @@ class CartsView(View):
         sku_id = data.get('sku_id')
         count = data.get('count')
         selected = data.get('selected',True)
+
         # 2验证数据
         # 2.1 商品id,个数必须传递
         if not all([sku_id,count]):
@@ -154,6 +155,7 @@ class CartsView(View):
         # 2.4 判断选中状态是否为bool值
         if not isinstance(selected,bool):
             return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
+
         # 3.判断用户登陆状态
         user = request.user
         if user.is_authenticated:
@@ -177,62 +179,122 @@ class CartsView(View):
             else:
                 # 没有数据,则初始化字典
                 cookie_cart={}
-        # 4.1判断sku_id 是否存在于cookie_cart
+        # 4.2判断sku_id 是否存在于cookie_cart
         # 在里边则累加
         if sku_id in cookie_cart:
             #先获取原数据
             orginal_count =cookie_cart[sku_id]['count']
             #再累加
             count += orginal_count
-        # 4.2在更新数据
+        # 4.2.1在更新数据
         cookie_cart[sku_id]={
             'count':count,
             'selected':selected
         }
-        # 5.加密
-        # 5.1 将字典转换为 bytes类型
+        # 4.3加密
+        # 4.3.1 将字典转换为 bytes类型
         dumps = pickle.dumps(cookie_cart)
-        # 5.2 将bytes类型进行base64加密
+        # 4.3.2 将bytes类型进行base64加密
         cookie_cart = base64.b64encode(dumps)
-        # 5.3 设置cookie
+        # 4.3.3 设置cookie
         response = http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok'})
         response.set_cookie('carts',cookie_cart.decode(),max_age=3600)
-        # 5.4　返回响应
+        # 5.返回响应
         return response
-        # # 4.3 类型转换
-        # # 因为 redis和cookie的数据格式不一致,我们需要转换数据
-        # # 将redis转换为cookie的格式
-        # # carts: {sku_id:{count:xxx,selected:xxx}}
-        # # 4.3.1定义一个cookie形式字典
-        # cookie_cart = {}
-        # # 拆包
-        # for sku_id, count in sku_id_count.items():
-        #     # 判断我们遍历的商品id,是否在选中的列表中
-        #     if sku_id in selected_ids:
-        #         selected = True
-        #     else:
-        #         selected = False
-        #     cookie_cart[sku_id] = {
-        #         'count': count,
-        #         'selected': selected
-        #     }
-        #         # 6.获取所有商品的id
-        #         ids = cookie_cart.keys()
-        #         # 6.1 根据商品id查询商品的详细信息 [sku,sku,sku]
-        #         # mysql: float,double,decimal(货比类型)
-        #         skus = []
-        #         for id in ids:
-        #             # 6.2 将对象转换为字典
-        #             skus.append({
-        #                 'id': sku.id,
-        #                 'name': sku.name,
-        #                 'count': cookie_cart.get(sku.id).get('count'),
-        #                 'selected': str(cookie_cart.get(sku.id).get('selected')),  # 将True，转'True'，方便json解析
-        #                 'default_image_url': sku.default_image.url,
-        #                 'price': str(sku.price),  # 从Decimal('10.2')中取出'10.2'，方便json解析
-        #                 'amount': str(sku.price * cookie_cart.get(sku.id).get('count')),
-        #             })
-        #         context = {
-        #             'cart_skus': skus
-        #         }
-        #         return render(request, 'cart.html', context)
+
+        """
+        前端根据用户的状态,登陆就传递用户信息,不登陆就不传用户信息
+
+        1.判断用户是否登陆
+        2.登陆用户到redis中获取数据
+            2.1 连接redis
+            2.2 获取数据 hash   carts_userid: {sku_id:count}
+                        set     selected: [sku_id,]
+            2.3 获取所有的商品id
+            2.4 根据商品id查询商品的详细信息 [sku,sku,sku]
+            2.5 将对象转换为字典
+        3.未登录用户到cookie中获取数据
+            3.1 获取cookie中carts数据,同时进行判断
+            3.2 carts: {sku_id:{count:xxx,selected:xxx}}
+            3.3 获取所有商品的id
+            3.4 根据商品id查询商品的详细信息 [sku,sku,sku]
+            3.5 将对象转换为字典
+
+
+        1.判断用户是否登陆
+        2.登陆用户到redis中获取数据
+            2.1 连接redis
+            2.2 获取数据 hash   carts_userid: {sku_id:count}
+                        set     selected: [sku_id,]
+
+        3.未登录用户到cookie中获取数据
+            3.1 获取cookie中carts数据,同时进行判断
+            3.2 carts: {sku_id:{count:xxx,selected:xxx}}
+
+
+        4 获取所有商品的id
+        5 根据商品id查询商品的详细信息 [sku,sku,sku]
+        6 将对象转换为字典
+        7 返回相应
+        """
+    def get(self,request):
+        # 1.判断用户是否登陆
+        user = request.user
+        if user.is_authenticated:
+            # 2.登陆用户到redis中获取数据
+            #     2.1 连接redis
+            redis_conn = get_redis_connection('carts')
+            #     2.2 获取数据 hash   carts_userid: {sku_id:count}
+            sku_id_count = redis_conn.hgetall('carts_%s' % user.id)
+            #                 set    selected: [sku_id,]
+            selected_ids = redis_conn.smembers('selected_%s' % user.id)
+
+            # 3 类型转换
+            # 因为 redis和cookie的数据格式不一致,我们需要转换数据,将redis转换为cookie的格式
+            # 3.1定义一个cookie形式字典
+            cookie_cart = {}
+            # 拆包
+            for sku_id, count in sku_id_count.items():
+                # 判断我们遍历的商品id,是否在选中的列表中
+                if sku_id in selected_ids:
+                    selected = True
+                else:
+                    selected = False
+                cookie_cart[sku_id] = {
+                    'count': count,
+                    'selected': selected
+                }
+        else:
+            # 4.未登录用户到cookie中获取数据
+            carts = request.COOKIES.get('carts')
+            #     4.1 获取cookie中carts数据,同时进行判断
+            if carts is not None:
+                # 有数据
+                decode = base64.b64decode(carts)
+                cookie_cart = pickle.loads(decode)
+            else:
+                # 没有数据
+                cookie_cart = {}
+
+            # 5.获取所有商品的id
+            ids = cookie_cart.keys()
+            # 5.1 根据商品id查询商品的详细信息 [sku,sku,sku]
+            # mysql: float,double,decimal(货比类型)
+            skus = []
+            for id in ids:
+                # 5.2获取sku对象
+                sku = SKU.objects.get(pk=id)
+                # 5.3将对象转换为字典
+                skus.append({
+                    'id': sku.id,
+                    'name': sku.name,
+                    'count': cookie_cart.get(sku.id).get('count'),
+                    'selected': str(cookie_cart.get(sku.id).get('selected')),  # 将True，转'True'，方便json解析
+                    'default_image_url': sku.default_image.url,
+                    'price': str(sku.price),  # 从Decimal('10.2')中取出'10.2'，方便json解析
+                    'amount': str(sku.price * cookie_cart.get(sku.id).get('count')),
+                })
+            context = {
+                'cart_skus': skus
+            }
+            return render(request, 'cart.html', context)
