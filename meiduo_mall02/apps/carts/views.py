@@ -412,4 +412,48 @@ class CartsView(View):
            5.5 返回相应
        """
 
+    def delete(self, request):
+        # 1.接收数据(sku_id)
+        data = json.loads(request.body.decode())
+        sku_id = data.get('sku_id')
+        # 2.验证数据(验证商品是否存在)
+        try:
+            sku = SKU.objects.get(pk=sku_id)
+        except SKU.DoesNotExist:
+            return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '无此数据'})
+        # 3.获取用户信息
+        user = request.user
+        if user.is_authenticated:
+            # 4.登陆用户操作redis
+            #     4.1 连接redis
+            redis_conn = get_redis_connection('carts')
+            #     4.2 删除数据 hash,set
+            # hash
+            redis_conn.hdel('carts_%s' % user.id, sku_id)
+            # set
+            redis_conn.srem('selected_%s' % user.id, sku_id)
+            #     4.3 返回相应
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
 
+        else:
+            # 5.未登录用户操作cookie
+            #     5.1 获取carts数据
+            carts = request.COOKIES.get('carts')
+            #     5.2 判断数据是否存在
+            if carts is not None:
+                # 有数据
+                cookie_cart = pickle.loads(base64.b64decode(carts))
+            else:
+                # 没有数据
+                cookie_cart = {}
+            # 5.3 删除数据
+            if sku_id in cookie_cart:
+                del cookie_cart[sku_id]
+            # 5.4 对最新的数据进行加密处理
+            cookie_data = base64.b64encode(pickle.dumps(cookie_cart))
+            #     5.5 返回相应
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
+
+            response.set_cookie('carts', cookie_data, 3600)
+
+            return response
