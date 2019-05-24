@@ -288,3 +288,128 @@ class CartsView(View):
         }
         #6.返回响应
         return render(request, 'cart.html', context)
+
+    #购物车保持状态
+    def put(self,request):
+        """
+        # 1.接收数据
+        # 2.验证数据
+        #     2.0 sku_id,selected,count 都要提交过来
+        #     2.1 验证商品id
+        #     2.2 验证商品数量
+        #     2.3 验证选中状态是否为bool
+        # 3.获取用户用户信息,根据用户信息进行判断
+        # 4.登陆用户redis
+        #     4.1 连接redis
+        #     4.2 更新数据
+        #     4.3 返回相应
+        # 5.未登录用户cookie
+        #     5.1 获取cookie中的carts数据
+        #     5.2 判断数据是否存在
+        #     5.3 更新数据
+        #     5.4 对新数据进行加密处理
+        #     5.5 返回相应
+        :param request:
+        :return:
+        """
+
+        # 1.接收数据
+        data = json.loads(request.body.decode())
+        sku_id = data.get('sku_id')
+        count = data.get('count')
+        selected = data.get('selected',True)
+
+        # 2.验证数据
+        #     2.0 sku_id,selected,count 都要提交过来
+        if not all([sku_id,count,selected]):
+            return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数不全'})
+        #     2.1 验证商品id
+        try:
+            sku = SKU.objects.get(pk=sku_id)
+        except SKU.DoesNotExist:
+            return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有此商品'})
+        #     2.2 验证商品数量
+        try:
+            count = int(count)
+        except Exception as e:
+            return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
+        #     2.3 验证选中状态是否为bool
+        if not isinstance(selected,bool):
+            return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
+        # 3.获取用户用户信息,根据用户信息进行判断
+        user = request.user
+        # 4.登陆用户redis
+        if user.is_authenticated:
+        #     4.1 连接redis
+            redis_conn = get_redis_connection('carts')
+        #     4.2 更新数据
+            #hash
+            redis_conn.hset('carts_%s'%user.id,sku_id,count)
+            #set
+            if selected:
+                redis_conn.sadd('selected_%s'%user.id,sku_id)
+            else:
+                redis_conn.srem('selected_%s'%user.id,sku_id)
+        #     4.3 返回相应
+            cart_sku = {
+                'id': sku_id,
+                'count': count,
+                'selected': selected,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price,
+                'amount': sku.price * count,
+            }
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok', 'cart_sku': cart_sku})
+        # 5.未登录用户cookie
+        else:
+            #     5.1 获取cookie中的carts数据
+            carts = request.COOKIES.get('carts')
+            #     5.2 判断数据是否存在
+            if carts is not None:
+                cookie_cart = pickle.loads(base64.b64decode(carts))
+            else:
+                # 不存在
+                cookie_cart = {}
+            #     5.3 更新数据
+            # {sku_id:{count:xxx,selected:xxxx}}
+            if sku_id in cookie_cart:
+                cookie_cart[sku_id] = {
+                    'count': count,
+                    'selected': selected
+                }
+            #     5.4 对新数据进行加密处理
+                cookie_data = base64.b64encode(pickle.dumps(cookie_cart))
+            #     5.5 返回相应
+            cart_sku = {
+                'id': sku_id,
+                'count': count,
+                'selected': selected,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price,
+                'amount': sku.price * count,
+            }
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok', 'cart_sku': cart_sku})
+
+            response.set_cookie('carts', cookie_data.decode(), 3600)
+
+            return response
+
+    """
+       1.接收数据(sku_id)
+       2.验证数据(验证商品是否存在)
+       3.获取用户信息
+       4.登陆用户操作redis
+           4.1 连接redis
+           4.2 删除数据 hash,set
+           4.3 返回相应
+       5.未登录用户操作cookie
+           5.1 获取carts数据
+           5.2 判断数据是否存在
+           5.3 删除数据
+           5.4 对最新的数据进行加密处理
+           5.5 返回相应
+       """
+
+

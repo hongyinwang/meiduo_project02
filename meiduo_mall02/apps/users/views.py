@@ -790,3 +790,5 @@ class UserBrowseHistory(LoginRequiredMixin,View):
             })
         # 2.返回数据
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','skus':skus})
+
+
