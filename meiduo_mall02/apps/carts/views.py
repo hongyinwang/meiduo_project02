@@ -163,9 +163,9 @@ class CartsView(View):
             # 4.1 连接redis
             redis_conn = get_redis_connection('carts')
             # 4.2 hash
-            sku_id_count = redis_conn.hgetall('carts_%s'%user.id)
+            sku_id_count = redis_conn.hincrby('carts_%s'%user.id,sku_id,count)
             #     set
-            selected_ids = redis_conn.smembers('selected_%s'%user.id)
+            selected_ids = redis_conn.sadd('selected_%s'%user.id,sku_id)
             return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
 
         # 4.未登录用户保存在cookie中
@@ -248,8 +248,8 @@ class CartsView(View):
                     selected = True
                 else:
                     selected = False
-                cookie_cart[sku_id] = {
-                    'count': count,
+                cookie_cart[int(sku_id)] = {
+                    'count': int(count),
                     'selected': selected
                 }
         else:
