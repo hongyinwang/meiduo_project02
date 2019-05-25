@@ -7,7 +7,6 @@
     <list default="true" id="aea1bf85-abce-40ba-905c-fa62bf7717d4" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../.idea/workspace.xml" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/carts/views.py" afterPath="$PROJECT_DIR$/apps/carts/views.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -968,7 +967,14 @@
       <option name="project" value="LOCAL" />
       <updated>1558706949686</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="购物车(redis验证) hincrby,pipeline,redis获取的是bytes类型">
+      <created>1558764771335</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1558764771335</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -1031,7 +1037,8 @@
     <MESSAGE value="购物车的展示实现" />
     <MESSAGE value="更新购物车的（cookie实现）" />
     <MESSAGE value="删除购物车（cookie实现）" />
-    <option name="LAST_COMMIT_MESSAGE" value="删除购物车（cookie实现）" />
+    <MESSAGE value="购物车(redis验证) hincrby,pipeline,redis获取的是bytes类型" />
+    <option name="LAST_COMMIT_MESSAGE" value="购物车(redis验证) hincrby,pipeline,redis获取的是bytes类型" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
