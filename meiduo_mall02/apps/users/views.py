@@ -12,6 +12,7 @@ from django.views import View
 # Create your views here.
 from django_redis import get_redis_connection
 
+from apps.carts.utils import merge_cookie_to_redis
 from apps.goods.models import SKU
 from apps.users.models import Address
 from apps.users.models import User
@@ -209,6 +210,9 @@ class LoginView(View):
             response.set_cookie('username',user.username,max_age=None)
         else:
             response.set_cookie('username', user.username, max_age=14*24*3600)
+
+        # 在这里合并
+        response = merge_cookie_to_redis(request, user, response)
 
         #5.返回相应
         return response
