@@ -1,26 +1,10 @@
-"""
-将抽象的问题具体化
 
-需求:
-    当用户登陆的时候,需要将cookie数据合并到reids中
-
-    1.用户登陆的时候
-    2.合并数据
-    将cookie数据合并到reids中
-    1.获取到cookie数据
-    2.遍历cookie数据
-    3.当前是以cookie为主,所以我们直接将cookie数据转换为hash, set(记录选中的和未选中的)
-
-    4.连接redis 更新redis数据
-    5.将cookie数据删除
-
-"""
 import base64
 import pickle
 
 from django_redis import get_redis_connection
 
-#当用户登陆的时候,需要将cookie数据合并到reids中
+#合并购物车
 def merge_cookie_to_redis(request,user,response):
     """
     需求:

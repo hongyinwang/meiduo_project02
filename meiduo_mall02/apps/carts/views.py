@@ -105,32 +105,30 @@ from utils.response_code import RETCODE
 
 #购物车
 class CartsView(View):
-    #添加购物车的实现
+    #添加购物车
     def post(self,request):
         """
-            添加购物车的思路
-
-                需求:
-                    当用户点击加入购物车的时候,需要让前端收集  sku_id,count,selected(可以不提交默认是True)
-                    因为请求的时候会携带用户信息(如果用户登陆)
-                后端:
-                    # 1.后端接收数据
-                    #   1.1.获取数据(sku_id,count,selected)
-                    # 2.验证数据
-                    # 3.判断用户登陆状态
-                    # 4.登陆用户保存在redis
-                    #   4.1 连接redis
-                    #   4.2 hash
-                    #       set
-                    #   4.3 返回
-                    # 5.未登录用户保存在cookie中
-                    #   5.1 组织数据
-                    #   5.2 加密
-                    #   5.3 设置cookie
-                    #   5.4 返回相应
-                路由和请求方式
-                    POST        carts
-            """
+            需求:
+                当用户点击加入购物车的时候,需要让前端收集  sku_id,count,selected(可以不提交默认是True)
+                因为请求的时候会携带用户信息(如果用户登陆)
+            后端:
+                # 1.后端接收数据
+                #   1.1.获取数据(sku_id,count,selected)
+                # 2.验证数据
+                # 3.判断用户登陆状态
+                # 4.登陆用户保存在redis
+                #   4.1 连接redis
+                #   4.2 hash
+                #       set
+                #   4.3 返回
+                # 5.未登录用户保存在cookie中
+                #   5.1 组织数据
+                #   5.2 加密
+                #   5.3 设置cookie
+                #   5.4 返回相应
+            路由和请求方式
+                POST        carts
+        """
         # 1.后端接收数据
         data = json.loads(request.body.decode())
         # 1.1.获取数据(sku_id,count,selected)
@@ -202,9 +200,12 @@ class CartsView(View):
         # 5.返回响应
         return response
 
-    #购物车的展示实现
+    #展示购物车
     def get(self,request):
         """
+        #需求：
+            当用户添加购物车完成后，需要将用户的购物车商品信息展示出来
+
         # 1.判断用户是否登陆
         # 2.登陆用户到redis中获取数据
         #   2.1 连接redis
@@ -289,9 +290,12 @@ class CartsView(View):
         #6.返回响应
         return render(request, 'cart.html', context)
 
-    #购物车保持状态
+    #修改购物车
     def put(self,request):
         """
+        需求：
+            在购物车页面修改购物车使用局部刷新的效果
+
         # 1.接收数据
         # 2.验证数据
         #     2.0 sku_id,selected,count 都要提交过来
@@ -396,23 +400,26 @@ class CartsView(View):
 
             return response
 
-    """
-       1.接收数据(sku_id)
-       2.验证数据(验证商品是否存在)
-       3.获取用户信息
-       4.登陆用户操作redis
-           4.1 连接redis
-           4.2 删除数据 hash,set
-           4.3 返回相应
-       5.未登录用户操作cookie
-           5.1 获取carts数据
-           5.2 判断数据是否存在
-           5.3 删除数据
-           5.4 对最新的数据进行加密处理
-           5.5 返回相应
-       """
-
+    #删除购物车
     def delete(self, request):
+        """
+            需求：
+                在购物车页面删除购物车使用局部刷新的效果
+
+           1.接收数据(sku_id)
+           2.验证数据(验证商品是否存在)
+           3.获取用户信息
+           4.登陆用户操作redis
+               4.1 连接redis
+               4.2 删除数据 hash,set
+               4.3 返回相应
+           5.未登录用户操作cookie
+               5.1 获取carts数据
+               5.2 判断数据是否存在
+               5.3 删除数据
+               5.4 对最新的数据进行加密处理
+               5.5 返回相应
+           """
         # 1.接收数据(sku_id)
         data = json.loads(request.body.decode())
         sku_id = data.get('sku_id')

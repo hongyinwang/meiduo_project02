@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^', include('apps.goods.urls', namespace='goods')),
     # carts
     url(r'^', include('apps.carts.urls', namespace='carts')),
+    # orders
+    url(r'^', include('apps.orders.urls', namespace='orders')),
     # goods(子路由为haystack(自应用的中的urls))
     url(r'^search/', include('haystack.urls')),
 ]
