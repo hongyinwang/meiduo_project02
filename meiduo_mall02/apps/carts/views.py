@@ -112,93 +112,113 @@ class CartsView(View):
                 当用户点击加入购物车的时候,需要让前端收集  sku_id,count,selected(可以不提交默认是True)
                 因为请求的时候会携带用户信息(如果用户登陆)
             后端:
-                # 1.后端接收数据
-                #   1.1.获取数据(sku_id,count,selected)
-                # 2.验证数据
+                # 1.获取用户数据(sku_id,count,selected)
+                # 2.验证用户数据
+                    # 2.1 商品id,个数必须传递
+                    # 2.2 判断商品是否存在
+                    # 2.3 判断商品的个数是否为整形
+                    # 2.4 判断选中状态是否为bool值
                 # 3.判断用户登陆状态
+                    # 3.1  获取user信息
+                    # 3.2  判断是否登陆
                 # 4.登陆用户保存在redis
-                #   4.1 连接redis
-                #   4.2 hash
-                #       set
-                #   4.3 返回
+                    # 4.1 连接redis
+                    # 4.2 保存数据
+                        # 保存数据(user.id,sku_id,count)到hash
+                        # 保存选中数据(user.id,sku_id)到set
+                    # 4.3 返回响应
                 # 5.未登录用户保存在cookie中
-                #   5.1 组织数据
-                #   5.2 加密
-                #   5.3 设置cookie
-                #   5.4 返回相应
+                    # 5.1 判断sku_id 是否存在于cookie_cart
+                        # 判断cookie中数据是否存在
+                            # 存在则解密
+                            # 不存在则初始化字典
+                        # 判断sku_id 是否存在于cookie_cart
+                            # 存在则获取原数据,并数量累加
+                    # 5.2 更新数据(存在/不存在)
+                    # 5.3 加密cookie中的数据
+                    # 5.4 保存用户信息
+                        # 设置response
+                        # 设置cookie
+                    # 5.5.返回响应
             路由和请求方式
                 POST        carts
         """
-        # 1.后端接收数据
+        # 1.接收用户数据
         data = json.loads(request.body.decode())
-        # 1.1.获取数据(sku_id,count,selected)
+            # 1.1.获取数据(sku_id,count,selected)
         sku_id = data.get('sku_id')
         count = data.get('count')
         selected = data.get('selected',True)
 
-        # 2验证数据
-        # 2.1 商品id,个数必须传递
+        # 2.验证数据
+            # 2.1 商品id,个数必须传递
         if not all([sku_id,count]):
             return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数不全'})
-        # 2.2 判断商品是否存在
+            # 2.2 判断商品是否存在
         try:
             sku = SKU.objects.get(pk=sku_id)
         except SKU.DoesNotExist:
             return http.JsonResponse({'code':RETCODE.NODATAERR,'errmsg':'没有此商品'})
-        # 2.3 判断商品的个数是否为整形
+            # 2.3 判断商品的个数是否为整形
         try:
             count = int(count)
         except Exception as e:
             return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
-        # 2.4 判断选中状态是否为bool值
+            # 2.4 判断选中状态是否为bool值
         if not isinstance(selected,bool):
             return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
 
         # 3.判断用户登陆状态
+            # 3.1获取user信息
+            # 3.2判断是否登陆
         user = request.user
         if user.is_authenticated:
-            # 4.登陆用户保存在redis
+        # 4.登陆用户保存在redis
             # 4.1 连接redis
             redis_conn = get_redis_connection('carts')
-            # 4.2 hash
-            sku_id_count = redis_conn.hincrby('carts_%s'%user.id,sku_id,count)
-            #     set
-            selected_ids = redis_conn.sadd('selected_%s'%user.id,sku_id)
+            # 4.2 保存数据
+                # 保存数据(user.id,sku_id,count)到hash
+            redis_conn.hincrby('carts_%s'%user.id,sku_id,count)
+                # 保存选中数据(user.id,sku_id)到set
+            redis_conn.sadd('selected_%s'%user.id,sku_id)
+            # 4.3 返回响应
             return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
 
-        # 4.未登录用户保存在cookie中
+        # 5.未登录用户保存在cookie中
         else:
-            # 4.1 获取cookie中carts数据,同时进行判断
+            # 5.1判断sku_id 是否存在于cookie_cart
+                # 获取cookie中的数据
             carts = request.COOKIES.get('carts')
+                # 判断cookie中数据是否存在
             if carts is not None:
-                #有数据(解密)
+                    # 存在则解密
                 decode=base64.b64decode(carts)
                 cookie_cart = pickle.loads(decode)
             else:
-                # 没有数据,则初始化字典
+                    #不存在则初始化字典
                 cookie_cart={}
-        # 4.2判断sku_id 是否存在于cookie_cart
-        # 在里边则累加
-        if sku_id in cookie_cart:
-            #先获取原数据
-            orginal_count =cookie_cart[sku_id]['count']
-            #再累加
-            count += orginal_count
-        # 4.2.1在更新数据
-        cookie_cart[sku_id]={
-            'count':count,
-            'selected':selected
-        }
-        # 4.3加密
-        # 4.3.1 将字典转换为 bytes类型
-        dumps = pickle.dumps(cookie_cart)
-        # 4.3.2 将bytes类型进行base64加密
-        cookie_cart = base64.b64encode(dumps)
-        # 4.3.3 设置cookie
-        response = http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok'})
-        response.set_cookie('carts',cookie_cart.decode(),max_age=3600)
-        # 5.返回响应
-        return response
+                #判断sku_id是否存在于cookie_cart
+            if sku_id in cookie_cart:
+                    #存在则获取原数据,并数量累加
+                orginal_count =cookie_cart[sku_id]['count']
+                count += orginal_count
+            #5.2更新数据(存在/不存在)
+            cookie_cart[sku_id]={
+                'count':count,
+                'selected':selected
+            }
+            #5.3加密cookie中的数据
+                    # 将字典转换为 bytes类型
+            dumps = pickle.dumps(cookie_cart)
+                    # 将bytes类型进行base64加密
+            cookie_dumps = base64.b64encode(dumps)
+            # 5.4保存用户信息
+                # 设置response
+            response = http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok'})
+                # 设置cookie
+            response.set_cookie('carts',cookie_dumps.decode(),max_age=3600)
+            # 5.5返回响应
+            return response
 
     #展示购物车
     def get(self,request):

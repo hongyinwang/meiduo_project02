@@ -3,7 +3,10 @@ from . import views
 
 
 urlpatterns = [
-    # 定义用户注册页面
+    # OrderSettlementView
     url(r'^settlement/$', views.OrderSettlementView.as_view(), name='settlement'),
+
+    # OrderCommitView
+    url(r'^orders/commit/$', views.OrderCommitView.as_view(), name='ordercommit'),
 
    ]

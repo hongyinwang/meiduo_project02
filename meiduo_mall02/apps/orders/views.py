@@ -1,3 +1,6 @@
+import json
+
+from decimal import Decimal
 from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
@@ -7,10 +10,15 @@ from django.views import View
 from django_redis import get_redis_connection
 
 from apps.goods.models import SKU
+from apps.orders.models import OrderInfo
 from apps.users.models import Address
 
 
 #订单
+from utils.response_code import RETCODE
+from utils.views import LoginRequiredJSONMixin
+
+"""保存订单信息和订单商品信息"""
 class OrderSettlementView(LoginRequiredMixin,View):
     #订单结算
     def get(self,request):
@@ -69,7 +77,7 @@ class OrderSettlementView(LoginRequiredMixin,View):
         for sku in skus:
             # 8.遍历的过程中 对sku添加数量和对应商品的总金额
             sku.count=selected_carts[sku.id] #数量小计
-            sku.amount=sku.count*sku.price                   #金额小计
+            sku.amount=sku.count*sku.price   #金额小计
             #     也去计算当前订单的总数量和总金额
             total_count += sku.count
             total_amount += sku.amount
@@ -88,3 +96,95 @@ class OrderSettlementView(LoginRequiredMixin,View):
         #11.返回响应
         return render(request, 'place_order.html', context=context)
 
+#订单提交页面
+class OrderCommitView(LoginRequiredJSONMixin, View):
+    # 订单提交页面
+    def post(self, request):
+        """
+    生成订单信息需要涉及到订单基本信息和订单商品信息,因为 订单基本信息订单商品信息
+    是1对n,所以先生成1(订单基本信息)的数据,再生成订单商品
+
+    1. 生成订单基本信息
+        1.1 必须是登陆用户才可以访问.获取用户信息
+        1.2 获取提交的地址信息
+        1.3 获取提交的支付方式
+        1.4 手动生成一个订单id 年月日时分秒+9位用户id
+        1.5 运费,总金额和总数量(初始化为0)
+        1.6 订单状态(由支付方式决定)
+    2. 生成订单商品信息
+        2.1 连接redis.获取redis中的数据
+        2.2 获取选中商品的id [1,2,3]
+        2.3 对id进行遍历
+            2.4 查询商品
+            2.5 库存量的判断
+            2.6 修改商品的库存和销量
+            2.7 累加总数量和总金额
+            2.8 保存订单商品信息
+            2.9 保存订单的总数量和总金额
+
+    """
+        # 1. 生成订单基本信息
+        #     1.1 必须是登陆用户才可以访问.获取用户信息
+        user = request.user
+        #     1.2 获取提交的地址信息
+        data = json.loads(request.body.decode())
+        address_id = data.get('address_id')
+        try:
+            address = Address.objects.get(pk=address_id)
+        except Address.DoesNotExist:
+            return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
+        #   1.3 获取提交的支付方式
+        pay_method = data.get('pay_method')
+        # 最好对支付方式进行一个判断
+        # 本质
+        # if 1 in [1,2]:
+        #     pass
+
+        if not pay_method in [OrderInfo.PAY_METHODS_ENUM['CASH'], OrderInfo.PAY_METHODS_ENUM['ALIPAY']]:
+            return http.JsonResponse({'code': RETCODE.PARAMERR, 'errmsg': '参数错误'})
+
+        # 1.4 手动生成一个订单id 年月日时分秒+9位用户id
+        # Y Year
+        # m month
+        # d day
+        # H Hour
+        # M Minute
+        # S Second
+        from django.utils import timezone
+        order_id = timezone.now().strftime('%Y%m%d%H%M%S') + '%09d' % user.id
+        #     1.5 运费,总金额和总数量(初始化为0)
+        freight = Decimal('10.00')  # 运费
+        total_amount = Decimal('0')  # 总金额
+        total_count = 0
+        #     1.6 订单状态(由支付方式决定)
+        # if pay_method == OrderInfo.PAY_METHODS_ENUM['CASH']:
+        #     # 货到付款
+        #     status=2
+        # else:
+        #     # 支付宝
+        #     status=1
+
+        if pay_method == OrderInfo.PAY_METHODS_ENUM['CASH']:
+            # 货到付款
+            status = OrderInfo.ORDER_STATUS_ENUM['UNSEND']
+        else:
+            # 支付宝
+            status = OrderInfo.ORDER_STATUS_ENUM['UNPAID']
+
+        from django.db import transaction
+        with transaction.atomic():
+
+            # 1.创建事务回滚的点
+            save_point = transaction.savepoint()
+
+            order = OrderInfo.objects.create(
+                order_id=order_id,
+                user=user,
+                address=address,
+                total_count=total_count,
+                total_amount=total_amount,
+                freight=freight,
+                pay_method=pay_method,
+                status=status
+            )
+        pass
