@@ -272,3 +272,26 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
 
         # 响应提交订单结果
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','order_id': order.order_id})
+
+#订单展示页面
+class OrderSuccessView(LoginRequiredMixin,View):
+    """提交订单成功"""
+    def get(self,request):
+        """
+        1.获取数据
+        2.组织渲染数据
+        3.返回响应
+        :param request:
+        :return:
+        """
+        order_id = request.GET.get('order_id')
+        payment_amount = request.GET.get('payment_amount')
+        pay_method = request.GET.get('pay_method')
+
+        context = {
+            'order_id':order_id,
+            'payment_amount':payment_amount,
+            'pay_method':pay_method
+        }
+
+        return render(request,'order_success.html',context)

@@ -7,6 +7,9 @@ urlpatterns = [
     url(r'^settlement/$', views.OrderSettlementView.as_view(), name='settlement'),
 
     # OrderCommitView
-    url(r'^orders/commit/$', views.OrderCommitView.as_view(), name='commit'),
+    url(r'^orders/commit/$', views.OrderCommitView.as_view(), name='ordercommit'),
+
+    # OrderCommitView
+    url(r'^orders/success/$', views.OrderSuccessView.as_view(), name='ordersuccess'),
 
    ]

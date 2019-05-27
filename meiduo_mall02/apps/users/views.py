@@ -167,6 +167,7 @@ class LoginView(View):
         password = datas.get('password')
         remembered = datas.get('remembered')
 
+
         #2.校验数
         #2.1判断参数是否齐全
         if not all([username,password]):

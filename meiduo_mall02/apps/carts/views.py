@@ -170,7 +170,7 @@ class CartsView(View):
 
         # 3.判断用户登陆状态
             # 3.1获取user信息
-            # 3.2判断是否登陆
+            # 3.2判断是否登陆sku_id
         user = request.user
         if user.is_authenticated:
         # 4.登陆用户保存在redis
@@ -451,7 +451,7 @@ class CartsView(View):
         # 3.获取用户信息
         user = request.user
         if user.is_authenticated:
-            # 4.登陆用户操作redis
+            # 4.登陆用户删除redis中数据
             #     4.1 连接redis
             redis_conn = get_redis_connection('carts')
             #     4.2 删除数据 hash,set
@@ -463,7 +463,7 @@ class CartsView(View):
             return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok'})
 
         else:
-            # 5.未登录用户操作cookie
+            # 5.未登录用户删除cookie中数据
             #     5.1 获取carts数据
             carts = request.COOKIES.get('carts')
             #     5.2 判断数据是否存在
