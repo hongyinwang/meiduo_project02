@@ -118,16 +118,16 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
     #     1.7支付方式
     #     1.8.保存订单信息(mysql数据库)
     # 2. 生成订单商品订单生成(简单)信息
-    #     2.1 连接redis.获取redis中的数据
-    #     2.2 获取选中商品的id [1,2,3]
-    #     2.3 对id进行遍历
-    #         2.4 查询商品
-    #         2.5 库存量的判断
-    #         2.6 修改商品的库存和销量
-    #         2.7 累加总数量和总金额
-    #         2.8 保存订单商品信息
-    #         2.9 保存订单的总数量和总金额
-
+    #   2.1 从redis中读取购物车中被勾选的商品信息
+    #   2.2遍历购物车中被勾选的商品信息
+            # 查询商品信息
+            # 读取原始库存
+            # 库存量的判断
+            # 模拟延迟
+            # 乐观锁更新库存和销量
+            # 保存订单商品信息 OrderGoods（多）
+            # 添加邮费和保存订单信息
+            # 响应提交订单结果
     """
         # 1. 生成订单基本信息
         #     1.1获取用户信息(必须是登陆用户)
@@ -168,7 +168,7 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
             save_point = transaction.savepoint()
 
             try:
-                #     1.8.保存订单信息(mysql数据库)
+                # 1.8.保存订单信息(mysql数据库)
                 order = OrderInfo.objects.create(
                     order_id=order_id,
                     user=user,
@@ -197,40 +197,61 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
                 sku_ids = selected_carts.keys()
 
                 # 2.2遍历购物车中被勾选的商品信息
-                for id in sku_ids:
-                    # 查询商品信息
-                    sku = SKU.objects.get(pk=id)
-                    # 库存量的判断
-                    sku_count = selected_carts[sku.id]
-                    if sku.stock < sku_count:
-                        #02出错就会滚
-                        transaction.savepoint_rollback(save_point)
-                        return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
+                for sku_id in sku_ids:
+                    while True:
+                        # 查询商品信息
+                        sku = SKU.objects.get(pk=sku_id)
 
-                    # 模拟延迟
-                    # import time
-                    # time.sleep(7)
+                        # 读取原始库存
+                        origin_stock = sku.stock
+                        origin_sales = sku.sales
 
-                    # 悲观锁SKU减少库存，增加销量
-                    sku.stock -= sku_count
-                    sku.sales += sku_count
-                    sku.save()
+                        # 库存量的判断
+                        sku_count = selected_carts[sku.id]
+                        if sku.stock < sku_count:
 
+                            #02出错就会滚
+                            transaction.savepoint_rollback(save_point)
 
-                    # 2.3保存订单商品信息 OrderGoods（多）
-                    OrderGoods.objects.create(
-                        order=order,
-                        sku=sku,
-                        count=sku_count,
-                        price=sku.price
-                    )
+                            return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
 
-                    # 2.5保存商品订单中总价和总数量
-                    order.total_count+=sku_count
-                    order.total_amount+=(sku.price * sku_count)
+                        # 模拟延迟
+                        # import time
+                        # time.sleep(7)
 
+                        # 悲观锁SKU减少库存，增加销量
+                        # sku.stock -= sku_count
+                        # sku.sales += sku_count
+                        # sku.save()
 
-                # 2.6添加邮费和保存订单信息
+                        # 乐观锁更新库存和销量
+                        new_stock = origin_stock - sku_count
+                        new_sales = origin_sales + sku_count
+                        # 查询一下当前商品旧的库存量并更新数据
+                        result = SKU.objects.filter(id=sku_id,stock=origin_stock).update(
+                            stock=new_stock,
+                            sales=new_sales
+                        )
+                        #如果下单失败，但是库存量足够，则可以继续下单
+                        if result == 0:
+                            continue
+
+                        # 保存订单商品信息 OrderGoods（多）
+                        OrderGoods.objects.create(
+                            order=order,
+                            sku=sku,
+                            count=sku_count,
+                            price=sku.price
+                        )
+
+                        # 保存商品订单中总价和总数量
+                        order.total_count+=sku_count
+                        order.total_amount+=(sku.price * sku_count)
+
+                        #下单成功或职责失败跳出循环
+                        break
+
+                # 添加邮费和保存订单信息
                 order.total_amount += order.freight
                 order.save()
 
@@ -240,14 +261,14 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
                 transaction.savepoint_rollback(save_point)
                 return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '下单失败'})
 
-            # 提交订单成功，显式的提交一次事务
-            transaction.savepoint_commit(save_point)
+        # 提交订单成功，显式的提交一次事务
+        transaction.savepoint_commit(save_point)
 
-            # # 清除购物车中已结算的商品
-            # pl = redis_conn.pipeline()
-            # pl.hdel('carts_%s' % user.id, *selected)
-            # pl.srem('selected_%s' % user.id, *selected)
-            # pl.execute()
+        # 清除购物车中已结算的商品
+        # pl = redis_conn.pipeline()
+        # pl.hdel('carts_%s' % user.id, *selected)
+        # pl.srem('selected_%s' % user.id, *selected)
+        # pl.execute()
 
-            # 响应提交订单结果
-            return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','order_id': order.order_id})
+        # 响应提交订单结果
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','order_id': order.order_id})
