@@ -15,7 +15,8 @@ from django_redis import get_redis_connection
 from apps.goods.models import SKU
 from apps.orders.models import OrderInfo, OrderGoods
 from apps.users.models import Address
-
+import logging
+logger = logging.getLogger('django')
 
 #订单
 from utils.response_code import RETCODE
@@ -159,74 +160,94 @@ class OrderCommitView(LoginRequiredJSONMixin, View):
         else:
             #支付宝
             status = OrderInfo.ORDER_STATUS_ENUM['UNSEND']
-        #     1.8.保存订单信息(mysql数据库)
-        order = OrderInfo.objects.create(
-            order_id=order_id,
-            user=user,
-            address=address,
-            total_count=total_count,
-            total_amount=total_amount,
-            freight=freight,
-            pay_method=pay_method,
-            status=status
-        )
-    # 2. 生成订单商品信息
-        # 2.1 从redis中读取购物车中被勾选的商品信息
-        redis_conn = get_redis_connection('carts')
-        redis_carts = redis_conn.hgetall('carts_%s'%user.id)
-        selected = redis_conn.smembers('selected_%s'%user.id)
-                #把二进制转化成python字典数据
-                #初始化一个字典
-        selected_carts = {}
-        #       #对selected_ids进行遍历追加,获取选中的商品信息转化成hash格式
-        for sku_id in selected:
-                #hash格式 user.id{sku_id,count}
-                #set格式 user.id{sku_id,sku_id}
-            selected_carts[int(sku_id)]=int(redis_carts[sku_id])
-                #获取选中商品的所有id [1,2,3]
-        sku_ids = selected_carts.keys()
 
-        # 2.2遍历购物车中被勾选的商品信息
-        for id in sku_ids:
-            while True:
-                # 查询商品
-                sku = SKU.objects.get(pk=id)
-                # 库存量的判断
-                sku_count = selected_carts[sku.id]
-                if sku.stock<sku_count:
-                    return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
+        from django.db import transaction
 
-                import time
-                time.sleep(7)
-                # # SKU减少库存，增加销量
-                # sku.stock -= sku_count
-                # sku.sales += sku_count
-                # sku.save()
+        with transaction.atomic():
+            #01创建事务回滚的点
+            save_point = transaction.savepoint()
 
-                # SKU减少库存，增加销量
-                old_stock = sku.stock
-                sku.stock -= sku_count
-                sku.sales += sku_count
-                rect = SKU.objects.filter(id=id, stock=old_stock).update(
-                    stock=sku.stock,
-                    sales=sku.sales
+            try:
+                #     1.8.保存订单信息(mysql数据库)
+                order = OrderInfo.objects.create(
+                    order_id=order_id,
+                    user=user,
+                    address=address,
+                    total_count=total_count,
+                    total_amount=total_amount,
+                    freight=freight,
+                    pay_method=pay_method,
+                    status=status
                 )
-                if rect == 0:
-                    continue
-                # 2.5保存商品订单中总价和总数量
-                order.total_count+=sku_count
-                order.total_amount+=(sku.price * sku_count)
 
-                # 2.3保存订单商品信息 OrderGoods（多）
-                OrderGoods.objects.create(
-                    order=order,
-                    sku=sku,
-                    count=sku_count,
-                    price=sku.price
-                )
-                break
-        # 2.6添加邮费和保存订单信息
-        order.save()
+            # 2. 生成订单商品信息
+                # 2.1 从redis中读取购物车中被勾选的商品信息
+                redis_conn = get_redis_connection('carts')
+                redis_carts = redis_conn.hgetall('carts_%s'%user.id)
+                selected = redis_conn.smembers('selected_%s'%user.id)
+                    #把二进制转化成python字典数据
+                    #初始化一个字典
+                selected_carts = {}
+                #       #对selected_ids进行遍历追加,获取选中的商品信息转化成hash格式
+                for sku_id in selected:
+                        #hash格式 user.id{sku_id,count}
+                        #set格式 user.id{sku_id,sku_id}
+                    selected_carts[int(sku_id)]=int(redis_carts[sku_id])
+                        #获取选中商品的所有id [1,2,3]
+                sku_ids = selected_carts.keys()
 
-        # 响应提交订单结果
-        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','order_id': order.order_id})
+                # 2.2遍历购物车中被勾选的商品信息
+                for id in sku_ids:
+                    # 查询商品信息
+                    sku = SKU.objects.get(pk=id)
+                    # 库存量的判断
+                    sku_count = selected_carts[sku.id]
+                    if sku.stock < sku_count:
+                        #02出错就会滚
+                        transaction.savepoint_rollback(save_point)
+                        return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
+
+                    # 模拟延迟
+                    # import time
+                    # time.sleep(7)
+
+                    # 悲观锁SKU减少库存，增加销量
+                    sku.stock -= sku_count
+                    sku.sales += sku_count
+                    sku.save()
+
+
+                    # 2.3保存订单商品信息 OrderGoods（多）
+                    OrderGoods.objects.create(
+                        order=order,
+                        sku=sku,
+                        count=sku_count,
+                        price=sku.price
+                    )
+
+                    # 2.5保存商品订单中总价和总数量
+                    order.total_count+=sku_count
+                    order.total_amount+=(sku.price * sku_count)
+
+
+                # 2.6添加邮费和保存订单信息
+                order.total_amount += order.freight
+                order.save()
+
+            except Exception as e:
+                logger.error(e)
+                # 事务回滚
+                transaction.savepoint_rollback(save_point)
+                return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '下单失败'})
+
+            # 提交订单成功，显式的提交一次事务
+            transaction.savepoint_commit(save_point)
+
+            # # 清除购物车中已结算的商品
+            # pl = redis_conn.pipeline()
+            # pl.hdel('carts_%s' % user.id, *selected)
+            # pl.srem('selected_%s' % user.id, *selected)
+            # pl.execute()
+
+            # 响应提交订单结果
+            return http.JsonResponse({'code':RETCODE.OK,'errmsg':'ok','order_id': order.order_id})
