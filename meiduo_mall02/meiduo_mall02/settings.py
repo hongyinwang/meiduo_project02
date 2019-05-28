@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'apps.orders',
        #自应用haystack为django-haystack中的自应用
     'haystack', # 全文检索
-    'apps.carts'
+    'apps.carts',
+    'apps.payment'
 ]
 
 MIDDLEWARE = [

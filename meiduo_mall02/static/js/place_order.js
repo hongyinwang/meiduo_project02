@@ -29,6 +29,13 @@ var vm = new Vue({
             if (this.order_submitting == false){
                 this.order_submitting = true;
                 var url = this.host + '/orders/commit/';
+
+                // 回想一下，利用HTTP协议向服务器传参有几种途径？
+                // 拼接在url后特定部分,可以在服务器端的路由中用正则表达式截取:如/weather/beijing/2018
+                // 拼接在url后查询字符串（query string)形式，形如key1=value1&key2=value2；
+                // 请求体（body）中发送的数据，比如表单数据、json、xml；
+                // 在http报文的头（header）中。
+
                 axios.post(url, {
                         address_id: this.nowsite,
                         pay_method: this.pay_method
